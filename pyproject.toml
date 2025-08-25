@@ -9,7 +9,7 @@ license = { text = "MIT" }
 dependencies = [
   "yt-dlp>=2025.1.1",
 
-    \"mutagen>=1.46\",
+    "mutagen>=1.46",
 ]
 
 [tool.ruff]
