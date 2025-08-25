@@ -35,6 +35,10 @@ combine-as-imports = true
 "tooltips.py"            = ["UP037", "UP045"]  # quoted type hints / X|None suggestions
 "i18n.py"                = ["UP006", "UP015", "UP045"]
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
 [tool.mypy]
 python_version = "3.9"
 ignore_missing_imports = true
