@@ -61,6 +61,7 @@ def terminate_all_procs() -> None:
 # Subprocess helpers
 # -----------------------
 
+
 def _run_capture(
     cmd: list[str],
     cwd: Path | None = None,
@@ -123,6 +124,7 @@ def run_quiet(
 # Tool resolution
 # -----------------------
 
+
 def resolve_tool_path(exe: str) -> str | None:
     """Best-effort cross-platform lookup for external tools."""
     p = shutil.which(exe)
@@ -165,6 +167,7 @@ def have(exe: str) -> bool:
 # Stubs used by GUI (safe no-ops if not used)
 # -----------------------
 
+
 def verify_tools() -> None:
     # Lightweight check; GUI mainly calls this to prompt/log.
     _ = [have(n) for n in ("yt-dlp", "ffmpeg", "ffprobe", "mp3gain")]
@@ -175,7 +178,9 @@ def check_and_install_deps(log: Callable[[str], None] | None = None) -> None:
         log("Automatic dependency installation is not implemented in this build.")
 
 
-def validate_sample_rates(_files: list[Path], _sr: int, _log: Callable[[str], None] | None = None) -> None:
+def validate_sample_rates(
+    _files: list[Path], _sr: int, _log: Callable[[str], None] | None = None
+) -> None:
     return
 
 
@@ -244,6 +249,7 @@ def get_album_name(files: list[Path]) -> str:
 # -----------------------
 # Cookies
 # -----------------------
+
 
 def _convert_cookie_editor_json_to_netscape(
     src_json: Path,
@@ -337,6 +343,7 @@ def prepare_cookies(
 # Audio helpers
 # -----------------------
 
+
 def write_id3_tags(
     mp3: Path,
     tags: dict[str, str],
@@ -415,7 +422,19 @@ def join_via_wav_then_lame(
         listfile.write_text("\n".join(list_lines) + "\n", encoding="utf-8", errors="ignore")
 
         rc1, so1, se1 = _run_capture(
-            [ffmpeg, "-y", "-f", "concat", "-safe", "0", "-i", str(listfile), "-c", "copy", str(big_wav)]
+            [
+                ffmpeg,
+                "-y",
+                "-f",
+                "concat",
+                "-safe",
+                "0",
+                "-i",
+                str(listfile),
+                "-c",
+                "copy",
+                str(big_wav),
+            ]
         )
         if rc1 != 0:
             if log:
@@ -453,6 +472,7 @@ def join_via_wav_then_lame(
 # Minimal task runner surface for GUI
 # -----------------------
 
+
 @dataclass
 class _ProgressMsg:
     pct: int | None = None
@@ -463,6 +483,7 @@ class ProcessingOptions:
     """
     Lightweight, flexible container – accepts any keyword args the GUI passes.
     """
+
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -478,6 +499,7 @@ def run_processing_task(
     Minimal placeholder so the GUI can run without the full pipeline.
     Emits a couple of progress messages and returns.
     """
+
     def _log(msg: str) -> None:
         try:
             log_queue.put(msg)

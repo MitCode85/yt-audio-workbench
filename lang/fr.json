@@ -37,7 +37,9 @@
     "include_id": "Inclure l’ID vidéo dans le nom",
     "archive": "Maintenir un journal des téléchargements (ignorer l’existant)",
     "validate_sr": "Valider la fréquence d’échant.",
-    "verbose_logging": "Journalisation détaillée de yt-dlp"
+    "verbose_logging": "Journalisation détaillée de yt-dlp",
+    "use_archive": "Maintenir un journal des téléchargements (ignorer l’existant)",
+    "verbose_ydl": "Journalisation détaillée de yt-dlp"
   },
   "buttons": {
     "run": "Lancer",
@@ -88,7 +90,23 @@
     "playlist_format_combo": "Crée un fichier playlist pour toutes les pistes téléchargées.",
     "check_deps_button": "Tente d’installer automatiquement les dépendances manquantes (p. ex. via winget sur Windows).",
     "checkboxes": {
-      "join_into_one": "Active la combinaison de tous les éléments en un seul MP3 (style album)."
+      "join_into_one": "Active la combinaison de tous les éléments en un seul MP3 (style album).",
+      "use_run_subdir": "Crée un sous-dossier daté pour chaque exécution afin de garder les fichiers organisés.",
+      "add_numbering": "Ajoute 001‑, 002‑, … au début des pistes, dans l’ordre de la playlist.",
+      "fallback_numbering": "Si l’ordre de la playlist est incertain, utilise une numérotation simple.",
+      "include_id": "Inclure l’ID vidéo dans le nom",
+      "sanitize_filenames": "Nettoyer les noms de fichiers (compatibilité maximale)",
+      "embed_metadata": "Écrit les balises ID3 (titre, artiste, album, pochette si disponible).",
+      "write_cue": "Génère un fichier .cue correspondant au fichier assemblé.",
+      "embed_chapters": "Ajoute des chapitres ID3 pour naviguer dans un fichier assemblé.",
+      "vlc_segments": "Crée une playlist de segments lisible par VLC au lieu d’un fichier unique.",
+      "randomize_order": "Randomize order before joining into a single MP3.",
+      "keep_temp_wavs": "Keep intermediate WAV files (useful for debugging).",
+      "dedup_artist": "If the artist name repeats at both ends of the filename, keep only one.",
+      "use_archive": "Use yt-dlp's download archive to skip already-processed items.",
+      "mp3gain_normalize": "Analyze and normalize loudness using MP3Gain (writes APEv2 tags).",
+      "validate_sr": "Valider la fréquence d’échant.",
+      "verbose_ydl": "Enable verbose yt-dlp logging to help troubleshoot downloads."
     },
     "paste_button": "Colle le contenu du presse‑papiers dans ce champ.",
     "browse_output_button": "Ouvre un sélecteur de dossier pour le répertoire de sortie.",
@@ -133,5 +151,10 @@
       "title": "Diagnostics copiés",
       "body": "Informations de diagnostic copiées dans le presse‑papiers."
     }
+  },
+  "help": {
+    "about_title": "À propos",
+    "diag_copied_title": "Diagnostics",
+    "diag_copied_msg": "Informations de diagnostic copiées dans le presse‑papiers."
   }
 }

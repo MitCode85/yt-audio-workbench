@@ -12,4 +12,3 @@ If you discover a security vulnerability, please responsibly disclose it:
 - Or open a private security advisory on GitHub
 
 We will acknowledge receipt within 48 hours and provide regular updates until the issue is resolved.
-

@@ -18,7 +18,7 @@ target-version = "py311"  # keep your current floor
 
 [tool.ruff.lint]
 # Keep only the "serious" checks for now (runtime errors + a bit of PyUpgrade).
-select = ["E9", "F63", "F7", "F82", "UP"]
+select = ["E", "F", "I", "UP", "B"]
 # Keep your long-line exception and silence noisy style rules we know you use.
 ignore = ["E501", "E401", "E402", "E701", "E702", "E703", "I001"]
 
@@ -32,8 +32,12 @@ combine-as-imports = true
 "workbench_core.py"      = ["E401", "E402", "E701", "E702", "E703", "I001"]
 "help_window.py"         = ["E401", "E402", "E701", "E702", "E703", "I001"]
 "ui_extras.py"           = ["E401", "E402", "E701", "E702", "E703", "I001"]
-"tooltips.py"            = ["UP037", "UP045"]  # quoted type hints / X|None suggestions
-"i18n.py"                = ["UP006", "UP015", "UP045"]
+"tooltips.py"            = ["UP037"]  # quoted type hints / X|None suggestions
+"i18n.py"                = ["UP006", "UP015"]
+
+[tool.ruff.format]
+quote-style = "preserve"
+indent-style = "space"
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

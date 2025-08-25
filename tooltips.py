@@ -1,4 +1,3 @@
-
 """
 Robust, race-safe tooltip manager for Tkinter with rebuild support.
 
@@ -11,7 +10,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk, TclError
 from collections.abc import Callable
-from typing import Optional, Any
+from typing import Any
 from weakref import WeakKeyDictionary
 
 
@@ -24,9 +23,9 @@ class TooltipManager:
         self._providers: "WeakKeyDictionary[tk.Misc, Callable[[], str]]" = WeakKeyDictionary()
         self._after_ids: "WeakKeyDictionary[tk.Misc, str]" = WeakKeyDictionary()
 
-        self._tip_win: Optional[tk.Toplevel] = None
-        self._label: Optional[ttk.Label] = None
-        self._current_widget: Optional[tk.Misc] = None
+        self._tip_win: tk.Toplevel | None = None
+        self._label: ttk.Label | None = None
+        self._current_widget: tk.Misc | None = None
 
     # ---------------------------
     # Public API
@@ -37,7 +36,7 @@ class TooltipManager:
             self._providers[widget] = text_or_callable
         else:
             s = str(text_or_callable)
-            self._providers[widget] = (lambda s=s: s)
+            self._providers[widget] = lambda s=s: s
 
         widget.bind("<Enter>", self._on_enter, add="+")
         widget.bind("<Leave>", self._on_leave, add="+")
@@ -101,7 +100,7 @@ class TooltipManager:
     def _on_motion(self, e: tk.Event) -> None:
         if self._tip_win and self._tip_win.winfo_exists():
             try:
-                self._tip_win.geometry(f"+{e.x_root+12}+{e.y_root+12}")
+                self._tip_win.geometry(f"+{e.x_root + 12}+{e.y_root + 12}")
             except Exception:
                 pass
 
@@ -188,7 +187,7 @@ class TooltipManager:
 
 
 # Global manager and convenience wrappers
-_DEFAULT_MANAGER: Optional[TooltipManager] = TooltipManager()
+_DEFAULT_MANAGER: TooltipManager | None = TooltipManager()
 
 
 def attach_tooltip(widget: tk.Misc, text_or_callable: Any) -> None:
@@ -213,6 +212,7 @@ def set_tooltip_delay(ms: int) -> None:
     if _DEFAULT_MANAGER:
         _DEFAULT_MANAGER.delay_ms = max(0, ms)
 
+
 def set_tooltip_wrap(px: int) -> None:
     """Set global tooltip wrap length in pixels."""
     global _DEFAULT_MANAGER
@@ -228,6 +228,7 @@ def set_tooltip_wrap(px: int) -> None:
                 _DEFAULT_MANAGER._label.configure(wraplength=_DEFAULT_MANAGER.wrap)
         except Exception:
             pass
+
 
 def get_tooltip_settings():
     """Return (delay_ms, wrap_px) for the global manager."""

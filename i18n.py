@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+
 class Language:
     """Tiny JSON-based language lookup with dot-path keys, e.g. 'tooltips.sample_rate'."""
 

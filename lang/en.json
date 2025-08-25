@@ -117,5 +117,10 @@
       "title": "Diagnostics copied",
       "body": "Diagnostic info copied to clipboard."
     }
+  },
+  "help": {
+    "about_title": "About",
+    "diag_copied_title": "Diagnostics",
+    "diag_copied_msg": "Diagnostic info copied to clipboard."
   }
 }

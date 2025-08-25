@@ -14,55 +14,79 @@ _VERSION = "0.0"
 
 
 def set_app_meta(app_name: str, version: str) -> None:
-    """Called by the main app to set metadata used in dialogs."""
     global _APP_NAME, _VERSION
-    _APP_NAME = app_name or _APP_NAME
-    _VERSION = version or _VERSION
+    _APP_NAME, _VERSION = app_name, version
 
 
 def _center_on_screen(win: tk.Toplevel) -> None:
-    win.update_idletasks()
-    w = win.winfo_width()
-    h = win.winfo_height()
-    sw = win.winfo_screenwidth()
-    sh = win.winfo_screenheight()
-    x = (sw // 2) - (w // 2)
-    y = (sh // 3) - (h // 2)
-    win.geometry(f"+{x}+{y}")
-
-
-def _tool_info(cmd: str, version_args: list[str]) -> list[str]:
-    out: list[str] = []
-    path = resolve_tool_path(cmd)
-    if not path:
-        out.append(f"{cmd}: not found")
-        return out
-    out.append(f"{cmd}: {path}")
     try:
-        import subprocess # nosec B404: importing subprocess is intentional; we use shell=False
+        win.update_idletasks()
+        w = win.winfo_width() or 800
+        h = win.winfo_height() or 600
+        sw = win.winfo_screenwidth()
+        sh = win.winfo_screenheight()
+        x = int((sw - w) / 2)
+        y = int((sh - h) / 2)
+        win.geometry(f"{w}x{h}+{x}+{y}")
+    except Exception:
+        pass
 
-        p = subprocess.run(
-            [path, *version_args],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
 
-        first = (
-            p.stdout.splitlines()[0]
-            if p.stdout.strip()
-            else (p.stderr.splitlines()[0] if p.stderr.strip() else "(no output)")
-        )
-        out.append(f"{cmd} version: {first}")
+def _tool_info(cmd: str, args: list[str]) -> list[str]:
+    import shutil, subprocess, sys, os
+
+    first_line = "(not found)"
+    p = shutil.which(cmd) or resolve_tool_path(cmd)
+    if not p:
+        # Some additional platform-specific locations
+        if os.name == "nt":
+            for base in [
+                os.environ.get("LOCALAPPDATA", ""),
+                os.environ.get("ProgramFiles", ""),
+                os.environ.get("ProgramFiles(x86)", ""),
+            ]:
+                for sub in ["yt-dlp", "FFmpeg", "mp3gain"]:
+                    cand = os.path.join(
+                        base, sub, cmd + (".exe" if not cmd.endswith(".exe") else "")
+                    )
+                    if os.path.exists(cand):
+                        p = cand
+                        break
+                if p:
+                    break
+        elif sys.platform == "darwin":
+            for base in ["/opt/homebrew/bin", "/usr/local/bin"]:
+                cand = os.path.join(base, cmd)
+                if os.path.exists(cand):
+                    p = cand
+                    break
+        else:
+            for base in ["/usr/bin", "/usr/local/bin"]:
+                cand = os.path.join(base, cmd)
+                if os.path.exists(cand):
+                    p = cand
+                    break
+
+    out: list[str] = [f"{cmd} path: {p or '(not found)'}"]
+    try:
+        if p:
+            proc = subprocess.run(
+                [p] + args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=2
+            )
+            first_line = proc.stdout.splitlines()[0].strip() if proc.stdout else "(no output)"
+        out.append(f"{cmd} version: {first_line}")
     except Exception as e:  # pragma: no cover - purely diagnostic
         out.append(f"{cmd} version: error: {e}")
     return out
 
 
 def _copy_diagnostics(parent: tk.Misc, get_text: Callable[[str, str], str]) -> None:
+    import platform, sys
+
     lines: list[str] = [
-        f"{_APP_NAME} v{_VERSION}",
-        f"Tk version: {tk.TkVersion}",
+        f"{_APP_NAME} v{_VERSION}".strip(),
+        f"Python: {sys.version.splitlines()[0]}",
+        f"OS: {platform.system()} {platform.release()}",
     ]
     for tool, args in [
         ("yt-dlp", ["--version"]),
@@ -71,16 +95,17 @@ def _copy_diagnostics(parent: tk.Misc, get_text: Callable[[str, str], str]) -> N
         ("mp3gain", ["-v"]),
     ]:
         lines.extend(_tool_info(tool, args))
+
     try:
         parent.clipboard_clear()
         parent.clipboard_append("\n".join(lines))
+        messagebox.showinfo(
+            get_text("help.diag_copied_title", "Diagnostics"),
+            get_text("help.diag_copied_msg", "Diagnostic info copied to clipboard."),
+            parent=parent,
+        )
     except Exception:
         pass
-    messagebox.showinfo(
-        get_text("dialog.copied.title", "Diagnostics copied"),
-        get_text("dialog.copied.body", "Diagnostic info copied to clipboard."),
-        parent=parent,
-    )
 
 
 def open_help_window(
@@ -100,53 +125,57 @@ def open_help_window(
 
     searchf = ttk.Frame(container)
     searchf.pack(fill="x")
-    ttk.Label(searchf, text=get_text("dialog.help.search", "Search:")).pack(side="left")
+    ttk.Label(searchf, text="Search:").pack(side="left")
     qvar = tk.StringVar()
     q = ttk.Entry(searchf, textvariable=qvar, width=50)
     q.pack(side="left", padx=6)
 
     body = ttk.Frame(container)
     body.pack(fill="both", expand=True)
+
     toc = tk.Listbox(body, width=28)
     toc.pack(side="left", fill="y", padx=(0, 8))
+
     txt = ScrolledText(body, wrap="word")
     txt.pack(side="right", fill="both", expand=True)
 
-    def do_search(*_args: object) -> None:
+    # Load Markdown and build anchors (very simple headings-based ToC)
+    try:
+        content = help_path.read_text(encoding="utf-8")
+    except Exception as e:
+        txt.insert("1.0", f"Failed to load HELP.md: {e}")
+        _center_on_screen(top)
+        top.grab_set()
+        top.wait_window()
+        return
+
+    anchors: list[tuple[str, int, int]] = []
+    lines = content.splitlines()
+    for i, line in enumerate(lines, start=1):
+        if line.startswith("#"):
+            depth = len(line) - len(line.lstrip("#"))
+            title = line.lstrip("#").strip()
+            anchors.append((title, i, depth))
+    txt.insert("1.0", content)
+
+    for title, _ln, depth in anchors:
+        toc.insert("end", ("  " * (depth - 1)) + title)
+
+    def do_search(*_):
         term = qvar.get().strip().lower()
         if not term:
             return
-        content = txt.get("1.0", "end-1c").lower()
-        pos = content.find(term)
+        text = txt.get("1.0", "end-1c").lower()
+        pos = text.find(term)
         if pos >= 0:
-            index = txt.index(f"1.0+{pos}c")
-            line = index.split(".")[0]
+            line = txt.get("1.0", f"{pos}c").count("\n") + 1
             txt.see(f"{line}.0")
             txt.tag_remove("sel", "1.0", "end")
             txt.tag_add("sel", f"{line}.0", f"{line}.0 lineend")
 
     q.bind("<Return>", do_search)
 
-    try:
-        raw = help_path.read_text(encoding="utf-8", errors="ignore")
-    except Exception:
-        raw = "# Help\n\n" + get_text("dialog.help.not_found", "Help file not found.")
-    txt.insert("end", raw)
-    txt.config(state="disabled")
-
-    _center_on_screen(top)
-
-    lines = raw.splitlines()
-    anchors: list[tuple[str, int, int]] = []
-    for i, line in enumerate(lines, start=1):
-        if line.startswith("#"):
-            depth = len(line) - len(line.lstrip("#"))
-            title = line.lstrip("#").strip()
-            anchors.append((title, i, depth))
-            toc.insert("end", ("    " * (depth - 1)) + title)
-
-    def jump(_evt: tk.Event | None = None, target: str | None = None) -> None:
-        lineno: int | None
+    def jump(_e=None, target: str | None = None):
         if target is None:
             sel = toc.curselection()
             if not sel:
@@ -169,47 +198,49 @@ def open_help_window(
     if section:
         jump(target=section)
 
-    # Diagnostics button in the search row (right side)
-    ttk.Button(
-        searchf,
-        text=get_text("dialog.help.copy_diagnostics", "Copy diagnostics"),
-        command=lambda: _copy_diagnostics(parent, get_text),
-    ).pack(side="right")
-
+    _center_on_screen(top)
     top.grab_set()
     top.wait_window()
 
 
-def show_about_dialog(parent: tk.Misc, help_path: Path, get_text: Callable[[str, str], str]) -> None:
+def show_about_dialog(
+    parent: tk.Misc, help_path: Path, get_text: Callable[[str, str], str]
+) -> None:
+    """Restore original About layout: app + version, two left buttons, Close on right."""
     top = tk.Toplevel(parent)
     top.title(get_text("dialog.about.title", "About"))
     top.resizable(False, False)
+    top.transient(parent)
 
     frm = ttk.Frame(top, padding=12)
     frm.pack(fill="both", expand=True)
 
     ttk.Label(frm, text=_APP_NAME, font=("TkDefaultFont", 12, "bold")).pack(anchor="w")
     ttk.Label(
-        frm,
-        text=get_text("dialog.about.version", "Version: {version}").format(version=_VERSION),
+        frm, text=get_text("dialog.about.version", "Version: {version}").format(version=_VERSION)
     ).pack(anchor="w", pady=(0, 8))
 
-    ttk.Button(
-        frm,
-        text=get_text("dialog.about.view_help", "View Help"),
-        command=lambda: open_help_window(parent, help_path, get_text),
-    ).pack(anchor="w")
+    # Buttons row: Copy diagnostics & Open Help→Troubleshooting on the left, Close on the right
+    row = ttk.Frame(frm)
+    row.pack(fill="x", pady=(4, 0))
 
     ttk.Button(
-        frm,
-        text=get_text("dialog.about.copy_diagnostics", "Copy diagnostics"),
+        row,
+        text=get_text("menu.copy_diagnostics", "Copy diagnostic info"),
         command=lambda: _copy_diagnostics(parent, get_text),
-    ).pack(anchor="w", pady=(8, 0))
+    ).pack(side="left")
 
-    ttk.Button(frm, text=get_text("dialog.about.close", "Close"), command=top.destroy).pack(
-        anchor="e", pady=(8, 0)
+    ttk.Button(
+        row,
+        text=get_text("dialog.about.open_troubleshooting", "Open Help → Troubleshooting"),
+        command=lambda: open_help_window(parent, help_path, get_text, section="Troubleshooting"),
+    ).pack(side="left", padx=6)
+
+    ttk.Button(row, text=get_text("dialog.about.close", "Close"), command=top.destroy).pack(
+        side="right"
     )
 
     _center_on_screen(top)
-    top.grab_set()
-    top.wait_window()
+    # Non-modal like the original; comment next two lines back in if you prefer modal
+    # top.grab_set()
+    # top.wait_window()
