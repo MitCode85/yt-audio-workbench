@@ -6,7 +6,7 @@ Welcome to the project! Here’s how to get your development environment set up 
 
 Before you begin, make sure you have the following installed on your system:
 
-* **Python 3.9+**
+* **Python 3.11+**
 * **Git**
 * **ffmpeg** & **ffprobe**
 * **mp3gain** (optional, but recommended)
@@ -77,5 +77,6 @@ This project uses standard tools to maintain code quality.
     # Install the hooks into your local .git folder
     pre-commit install
     ```
+
 
 That's it! You're ready to start developing.
