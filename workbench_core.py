@@ -407,7 +407,11 @@ def join_via_wav_then_lame(
     try:
         listfile = output_mp3.with_suffix(".concat_list.txt")
         big_wav = output_mp3.with_suffix(".joined.wav")
-        list_lines = [f"file '{str(p).replace(\"'\", \"'\\''\")}'" for p in wav_files]
+        list_lines = []
+        for p in wav_files:
+            # Perform the replacement outside the f-string
+            safe_path = str(p).replace("'", "'\\''")
+            list_lines.append(f"file '{safe_path}'")
         listfile.write_text("\n".join(list_lines) + "\n", encoding="utf-8", errors="ignore")
 
         rc1, so1, se1 = _run_capture(
