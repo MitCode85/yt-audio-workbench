@@ -106,17 +106,26 @@ jobs:
           "ZIP_NAME=$(Split-Path -Leaf $zipPath)" | Out-File -FilePath $env:GITHUB_ENV -Append
           "ZIP_PATH=$zipPath" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Pack artifact (macOS/Linux)
-        if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
+      # Package (macOS/Linux)
+      - name: Package artifact (*nix)
+        if: runner.os != 'Windows'
+        shell: bash
         run: |
-          cd dist
-          zip -r ../YT-Audio-Workbench-${{ runner.os }}.zip YT-Audio-Workbench
-          echo "ZIP_NAME=YT-Audio-Workbench-${{ runner.os }}.zip" >> $GITHUB_ENV
+          set -euo pipefail
+          dist_dir="$(find dist -maxdepth 1 -type d -print | head -n1)"
+          test -n "$dist_dir"
+          zip_name="${ARTIFACT_BASENAME}.zip"
+          (cd "$(dirname "$dist_dir")" && zip -r "../$zip_name" "$(basename "$dist_dir")" >/dev/null)
+          echo "ZIP_NAME=$zip_name" >> "$GITHUB_ENV"
+
+      # Upload
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ZIP_NAME }}
-          path: ${{ env.ZIP_PATH }}
+          name: ${{ env.ARTIFACT_BASENAME }}
+          path: ${{ env.ZIP_NAME }}
+          if-no-files-found: error
+          retention-days: 7
 
   release:
     name: Release on tag
