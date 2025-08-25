@@ -34,10 +34,10 @@ jobs:
           uv pip install ruff mypy bandit || pip install ruff mypy bandit
 
       - name: Lint (ruff)
-        run: ruff check .
+        run: python -m ruff check .
 
       - name: Type-check (mypy, lenient)
-        run: mypy --ignore-missing-imports . || true
+        run: python -m mypy --ignore-missing-imports . || true
 
       - name: Smoke test
         run: make test
