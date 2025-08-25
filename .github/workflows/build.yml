@@ -34,17 +34,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-tk
-      - name: Install deps
+      - name: Install Python dependencies
         run: |
-         python -m pip install --upgrade pip
-         python -m pip install pyinstaller mutagen
-      - name: Install project deps (requirements.txt if present)
-        if: ${{ hashFiles('requirements.txt') != '' }}
-        run: python -m pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
       - name: Run tests
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: uv run python -m pytest -q
+        run: python -m pytest -q
 
   build:
     name: Build (${{ matrix.os }})
@@ -64,14 +62,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-tk
-      - name: Install Python deps
+      - name: Install Python dependencies
         run: |
-          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
           python -m pip install --upgrade pip
           python -m pip install pyinstaller
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
       - name: Build with PyInstaller
-        run: |
-          pyinstaller -y yt_audio_workbench.spec
+        run: pyinstaller -y yt_audio_workbench.spec
       - name: Pack artifact (Windows)
         if: startsWith(matrix.os, 'windows')
         shell: pwsh
