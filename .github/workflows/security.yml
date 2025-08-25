@@ -28,7 +28,15 @@ jobs:
         run: |
           bandit -r . \
             -x tests,venv,.venv,build,dist,__pycache__,.github \
-            -f sarif -o bandit.sarif || true
+            -f sarif -o bandit.sarif
+        continue-on-error: true
+
+      - name: Check SARIF file exists
+        run: |
+          if [ ! -f bandit.sarif ]; then
+            echo "bandit.sarif not found!"
+            echo "{}" > bandit.sarif
+          fi
 
       - name: Upload SARIF to code scanning
         if: always()
