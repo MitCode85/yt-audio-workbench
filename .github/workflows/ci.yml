@@ -1,4 +1,4 @@
-name: CI (lean)
+name: CI (uv)
 
 on:
   push:
@@ -7,37 +7,59 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  test:
+    name: Tests (${{ matrix.os }} | py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+        python-version: ["3.11"]
 
-      - name: Set up Python
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
+      # Make pytest output calm but useful
+      PYTEST_ADDOPTS: "-q --maxfail=1 -ra"
+      # Ensure tests can import workbench_core from repo root
+      PYTHONPATH: ${{ github.workspace }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
 
       - name: Install uv
-        run: |
-          pip install uv
+        run: python -m pip install -q uv
 
-      - name: Sync deps (frozen if lock exists)
-        run: |
-          if [ -f uv.lock ]; then
-            uv sync --frozen
-          else
-            uv sync || true
-          fi
+      # Use workflow-level conditions instead of shell conditionals (works on Windows too)
+      - name: Sync deps (frozen)
+        if: ${{ hashFiles('uv.lock') != '' }}
+        run: uv sync --frozen
 
+      - name: Sync deps
+        if: ${{ hashFiles('uv.lock') == '' }}
+        run: uv sync
+
+      # Ensure dev tools exist even if not declared as deps
       - name: Install dev tools
-        run: |
-          pip install ruff mypy bandit
+        run: uv pip install -q ruff pytest mypy bandit
 
-      - name: Lint (ruff)
-        run: python -m ruff check .
+      - name: Lint (ruff, concise)
+        run: uv run ruff check . --output-format=concise
 
-      - name: Type-check (mypy, lenient)
-        run: python -m mypy --ignore-missing-imports . || true
+      - name: Type-check (mypy, non-blocking)
+        continue-on-error: true
+        run: uv run mypy --ignore-missing-imports .
 
-      - name: Smoke test
-        run: make test
+      - name: Security scan (bandit, non-blocking)
+        continue-on-error: true
+        run: uv run bandit -q -r .
+
+      - name: Run tests
+        run: uv run pytest
