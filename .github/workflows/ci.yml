@@ -31,7 +31,7 @@ jobs:
 
       - name: Install dev tools
         run: |
-          uv pip install ruff mypy bandit || pip install ruff mypy bandit
+          pip install ruff mypy bandit
 
       - name: Lint (ruff)
         run: python -m ruff check .
