@@ -36,7 +36,7 @@ class Language:
                 cur = cur[part]
             else:
                 return default
-        if isinstance(cur, (str, int, float)):
+        if isinstance(cur, str | int | float):
             return str(cur)
         return default
 
