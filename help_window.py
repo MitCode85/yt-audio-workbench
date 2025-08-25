@@ -39,14 +39,13 @@ def _tool_info(cmd: str, version_args: list[str]) -> list[str]:
         return out
     out.append(f"{cmd}: {path}")
     try:
-        import subprocess
+        import subprocess # nosec B404: importing subprocess is intentional; we use shell=False
 
         p = subprocess.run(
             [path, *version_args],
             capture_output=True,
             text=True,
             check=False,
-            timeout=3, # It's also good practice to include a timeout
         )
 
         first = (
