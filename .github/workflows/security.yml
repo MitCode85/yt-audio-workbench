@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write   # needed for SARIF upload
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
@@ -21,25 +21,22 @@ jobs:
           python-version: '3.11'
 
       - name: Install Bandit
-        run: python -m pip install --upgrade pip bandit
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade bandit
 
-      # Full report for triage (non-blocking), goes to the Security tab
+      # Non-blocking SARIF for the Security tab
       - name: Bandit SARIF (non-blocking)
         run: |
-          bandit -r . \
+          bandit -q -r . \
             -x tests,venv,.venv,build,dist,__pycache__,.github \
-            -f sarif -o bandit.sarif
+            -f sarif -o bandit.sarif || true
+          # If bandit didn't produce valid output, delete the file so we skip upload
+          [ -s bandit.sarif ] || rm -f bandit.sarif
         continue-on-error: true
 
-      - name: Check SARIF file exists
-        run: |
-          if [ ! -f bandit.sarif ]; then
-            echo "bandit.sarif not found!"
-            echo "{}" > bandit.sarif
-          fi
-
       - name: Upload SARIF to code scanning
-        if: always()
+        if: always() && hashFiles('bandit.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: bandit.sarif
