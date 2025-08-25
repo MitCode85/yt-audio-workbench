@@ -115,8 +115,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: YT-Audio-Workbench-${{ matrix.os }}
-          path: ${{ env.ZIP_NAME }}
+          name: ${{ env.ZIP_NAME }}
+          path: ${{ env.ZIP_PATH }}
 
   release:
     name: Release on tag
