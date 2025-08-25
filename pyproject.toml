@@ -14,7 +14,7 @@ dependencies = [
 
 [tool.ruff]
 line-length = 100
-target-version = "3.11"  # keep your current floor
+target-version = "py311"  # keep your current floor
 
 [tool.ruff.lint]
 # Keep only the "serious" checks for now (runtime errors + a bit of PyUpgrade).
