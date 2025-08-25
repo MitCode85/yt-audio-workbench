@@ -1,0 +1,43 @@
+name: CI (lean)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          pip install uv
+
+      - name: Sync deps (frozen if lock exists)
+        run: |
+          if [ -f uv.lock ]; then
+            uv sync --frozen
+          else
+            uv sync || true
+          fi
+
+      - name: Install dev tools
+        run: |
+          uv pip install ruff mypy bandit || pip install ruff mypy bandit
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Type-check (mypy, lenient)
+        run: mypy --ignore-missing-imports . || true
+
+      - name: Smoke test
+        run: make test
