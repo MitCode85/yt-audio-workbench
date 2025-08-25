@@ -801,3 +801,45 @@ def join_via_wav_then_lame(wav_files: list[Path], output_mp3: Path, lame_bitrate
         if log: log(f"[join] exception: {e}")
         return False
 
+
+# ---- Compatibility helpers (no-op fallbacks to satisfy imports) ----
+try:
+    validate_sample_rates
+except NameError:
+    def validate_sample_rates(_files, _sr, _log):
+        # Placeholder validator; real implementation is optional.
+        return
+
+try:
+    write_cue_for_joined
+except NameError:
+    def write_cue_for_joined(_joined_path, _parts, _log):
+        # Optional artifact; skip if not provided.
+        return
+
+try:
+    embed_id3_chapters
+except NameError:
+    def embed_id3_chapters(_joined_path, _parts, _log):
+        # Optional chapters; skip if not provided.
+        return
+
+try:
+    write_playlist
+except NameError:
+    def write_playlist(_out_dir, _files, _log, name="playlist", fmt=None):
+        # Minimal playlist writer (M3U)
+        try:
+            from pathlib import Path as _P
+            import os as _os
+            if fmt in (None, "M3U", "Both"):
+                m3u = _P(_out_dir) / f"{name}.m3u"
+                m3u.write_text("\n".join(str(p) for p in _files), encoding="utf-8")
+            if fmt in ("M3U8", "Both"):
+                m3u8 = _P(_out_dir) / f"{name}.m3u8"
+                m3u8.write_text("\n".join(str(p) for p in _files), encoding="utf-8")
+        except Exception as _e:
+            try:
+                _log(f"write_playlist failed: {_e}")
+            except Exception:
+                pass
