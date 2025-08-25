@@ -74,13 +74,38 @@ jobs:
       - name: Build with PyInstaller
         run: pyinstaller -y yt_audio_workbench.spec
       - name: Pack artifact (Windows)
-        if: startsWith(matrix.os, 'windows')
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $zip = "YT-Audio-Workbench-Windows.zip"
-          Compress-Archive -Path "dist\YT-Audio-Workbench\*" -DestinationPath $zip
-          echo "ZIP_NAME=$zip" >> $env:GITHUB_ENV
+
+          $dist = Join-Path $PWD 'dist'
+          if (-not (Test-Path $dist)) {
+            throw "dist/ not found. Did the build step run?"
+          }
+
+          # Prefer a product directory (onedir). Fallback to files (onefile).
+          $productDir = Get-ChildItem -Path $dist -Directory | Select-Object -First 1
+          if ($productDir) {
+            $zip = "$($productDir.Name)-Windows.zip"
+            Push-Location $productDir.FullName
+            Compress-Archive -Path * -DestinationPath (Join-Path $dist $zip) -Force
+            Pop-Location
+            $zipPath = Join-Path $dist $zip
+          } else {
+            $files = Get-ChildItem -Path $dist -File
+            if (-not $files) {
+              $found = (Get-ChildItem -Path $dist | Select-Object -ExpandProperty Name) -join ', '
+              throw "Nothing to pack in dist/. Found entries: $found"
+            }
+            $zip = 'YT-Audio-Workbench-Windows.zip'
+            Compress-Archive -Path ($files | ForEach-Object { $_.FullName }) -DestinationPath (Join-Path $dist $zip) -Force
+            $zipPath = Join-Path $dist $zip
+          }
+
+          # Expose name/path for the upload step
+          "ZIP_NAME=$(Split-Path -Leaf $zipPath)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "ZIP_PATH=$zipPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Pack artifact (macOS/Linux)
         if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         run: |
