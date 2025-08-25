@@ -110,10 +110,10 @@ jobs:
       - name: Pack artifact (macOS/Linux)
         if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
         run: |
-          ZIP_FILENAME="YT-Audio-Workbench-${{ runner.os }}.zip"
+          ZIP_FILENAME="YT-Audio-Workbench-${{ matrix.os }}.zip"
           cd dist
           zip -r ../"$ZIP_FILENAME" YT-Audio-Workbench
-          echo "ZIP_PATH=../$ZIP_FILENAME" >> $GITHUB_ENV
+          echo "ZIP_PATH=$ZIP_FILENAME" >> $GITHUB_ENV
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
