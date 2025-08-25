@@ -10,7 +10,8 @@ Public API:
 from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk, TclError
-from typing import Callable, Optional, Any
+from collections.abc import Callable
+from typing import Optional, Any
 from weakref import WeakKeyDictionary
 
 
