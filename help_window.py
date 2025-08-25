@@ -1,53 +1,103 @@
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable
 
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import ttk, messagebox
 from tkinter.scrolledtext import ScrolledText
 
 from workbench_core import resolve_tool_path
 
-APP_NAME = "YT Audio Workbench"
-VERSION = ""
-
-__all__ = ["open_help_window", "show_about_dialog", "set_app_meta"]
+_APP_NAME = "YT Audio Workbench"
+_VERSION = "0.0"
 
 
 def set_app_meta(app_name: str, version: str) -> None:
-    global APP_NAME, VERSION
-    APP_NAME = app_name or APP_NAME
-    VERSION = version or VERSION
+    """Called by the main app to set metadata used in dialogs."""
+    global _APP_NAME, _VERSION
+    _APP_NAME = app_name or _APP_NAME
+    _VERSION = version or _VERSION
 
 
 def _center_on_screen(win: tk.Toplevel) -> None:
     win.update_idletasks()
     w = win.winfo_width()
     h = win.winfo_height()
-    x = (win.winfo_screenwidth() // 2) - (w // 2)
-    y = (win.winfo_screenheight() // 2) - (h // 2)
-    win.geometry(f"{w}x{h}+{x}+{y}")
+    sw = win.winfo_screenwidth()
+    sh = win.winfo_screenheight()
+    x = (sw // 2) - (w // 2)
+    y = (sh // 3) - (h // 2)
+    win.geometry(f"+{x}+{y}")
+
+
+def _tool_info(cmd: str, version_args: list[str]) -> list[str]:
+    out: list[str] = []
+    path = resolve_tool_path(cmd)
+    if not path:
+        out.append(f"{cmd}: not found")
+        return out
+    out.append(f"{cmd}: {path}")
+    try:
+        import subprocess
+
+        p = subprocess.run(
+            [path, *version_args],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        first = (
+            p.stdout.splitlines()[0]
+            if p.stdout.strip()
+            else (p.stderr.splitlines()[0] if p.stderr.strip() else "(no output)")
+        )
+        out.append(f"{cmd} version: {first}")
+    except Exception as e:  # pragma: no cover - purely diagnostic
+        out.append(f"{cmd} version: error: {e}")
+    return out
+
+
+def _copy_diagnostics(parent: tk.Misc, get_text: Callable[[str, str], str]) -> None:
+    lines: list[str] = [
+        f"{_APP_NAME} v{_VERSION}",
+        f"Tk version: {tk.TkVersion}",
+    ]
+    for tool, args in [
+        ("yt-dlp", ["--version"]),
+        ("ffmpeg", ["-version"]),
+        ("ffprobe", ["-version"]),
+        ("mp3gain", ["-v"]),
+    ]:
+        lines.extend(_tool_info(tool, args))
+    try:
+        parent.clipboard_clear()
+        parent.clipboard_append("\n".join(lines))
+    except Exception:
+        pass
+    messagebox.showinfo(
+        get_text("dialog.copied.title", "Diagnostics copied"),
+        get_text("dialog.copied.body", "Diagnostic info copied to clipboard."),
+        parent=parent,
+    )
 
 
 def open_help_window(
     parent: tk.Misc,
     help_path: Path,
     get_text: Callable[[str, str], str],
-    section: Optional[str] = None,
+    section: str | None = None,
 ) -> None:
     """Open a help window rendering the HELP.md text; simple ToC based on headings."""
     top = tk.Toplevel(parent)
-    top.title(get_text("dialog.help.title", f"Help — {APP_NAME}").format(app=APP_NAME))
-    top.geometry("940x700")
+    top.title(get_text("dialog.help.title", f"Help — {_APP_NAME}").format(app=_APP_NAME))
+    top.geometry("940x640")
     top.transient(parent)
 
     container = ttk.Frame(top, padding=6)
     container.pack(fill="both", expand=True)
 
-    # -- search bar
     searchf = ttk.Frame(container)
     searchf.pack(fill="x")
     ttk.Label(searchf, text=get_text("dialog.help.search", "Search:")).pack(side="left")
@@ -55,13 +105,10 @@ def open_help_window(
     q = ttk.Entry(searchf, textvariable=qvar, width=50)
     q.pack(side="left", padx=6)
 
-    # -- main body (toc + text)
     body = ttk.Frame(container)
     body.pack(fill="both", expand=True)
-
     toc = tk.Listbox(body, width=28)
     toc.pack(side="left", fill="y", padx=(0, 8))
-
     txt = ScrolledText(body, wrap="word")
     txt.pack(side="right", fill="both", expand=True)
 
@@ -80,9 +127,8 @@ def open_help_window(
 
     q.bind("<Return>", do_search)
 
-    # -- load help
     try:
-        raw = Path(help_path).read_text(encoding="utf-8", errors="ignore")
+        raw = help_path.read_text(encoding="utf-8", errors="ignore")
     except Exception:
         raw = "# Help\n\n" + get_text("dialog.help.not_found", "Help file not found.")
     txt.insert("end", raw)
@@ -90,28 +136,27 @@ def open_help_window(
 
     _center_on_screen(top)
 
-    # -- build toc
+    lines = raw.splitlines()
     anchors: list[tuple[str, int, int]] = []
-    for i, line in enumerate(raw.splitlines(), start=1):
+    for i, line in enumerate(lines, start=1):
         if line.startswith("#"):
             depth = len(line) - len(line.lstrip("#"))
             title = line.lstrip("#").strip()
             anchors.append((title, i, depth))
             toc.insert("end", ("    " * (depth - 1)) + title)
 
-    def jump(_evt: Optional[tk.Event] = None, target: Optional[str] = None) -> None:
-        lineno: Optional[int]
+    def jump(_evt: tk.Event | None = None, target: str | None = None) -> None:
+        lineno: int | None
         if target is None:
             sel = toc.curselection()
             if not sel:
                 return
             idx = sel[0]
-            _, lineno, _ = anchors[idx]
+            _title, lineno, _depth = anchors[idx]
         else:
             lineno = None
-            t_lower = target.lower()
             for title, ln, _depth in anchors:
-                if title.lower().startswith(t_lower):
+                if title.lower().startswith(target.lower()):
                     lineno = ln
                     break
             if lineno is None:
@@ -124,8 +169,18 @@ def open_help_window(
     if section:
         jump(target=section)
 
+    # Diagnostics button in the search row (right side)
+    ttk.Button(
+        searchf,
+        text=get_text("dialog.help.copy_diagnostics", "Copy diagnostics"),
+        command=lambda: _copy_diagnostics(parent, get_text),
+    ).pack(side="right")
 
-def show_about_dialog(parent: tk.Misc, _help_path: Path, get_text: Callable[[str, str], str]) -> None:
+    top.grab_set()
+    top.wait_window()
+
+
+def show_about_dialog(parent: tk.Misc, help_path: Path, get_text: Callable[[str, str], str]) -> None:
     top = tk.Toplevel(parent)
     top.title(get_text("dialog.about.title", "About"))
     top.resizable(False, False)
@@ -133,66 +188,28 @@ def show_about_dialog(parent: tk.Misc, _help_path: Path, get_text: Callable[[str
     frm = ttk.Frame(top, padding=12)
     frm.pack(fill="both", expand=True)
 
-    ttk.Label(frm, text=APP_NAME, font=("TkDefaultFont", 12, "bold")).pack(anchor="w")
-    ttk.Label(frm, text=get_text("dialog.about.version", "Version: {version}").format(version=VERSION)).pack(
-        anchor="w", pady=(0, 8)
-    )
-
-    info = ttk.Label(
+    ttk.Label(frm, text=_APP_NAME, font=("TkDefaultFont", 12, "bold")).pack(anchor="w")
+    ttk.Label(
         frm,
-        text=get_text(
-            "dialog.about.blurb",
-            "A reliability-first Python GUI for yt-dlp and ffmpeg, designed for "
-            "creating high-quality, tagged, and normalized MP3 archives from YouTube.",
-        ),
-        wraplength=420,
-        justify="left",
+        text=get_text("dialog.about.version", "Version: {version}").format(version=_VERSION),
+    ).pack(anchor="w", pady=(0, 8))
+
+    ttk.Button(
+        frm,
+        text=get_text("dialog.about.view_help", "View Help"),
+        command=lambda: open_help_window(parent, help_path, get_text),
+    ).pack(anchor="w")
+
+    ttk.Button(
+        frm,
+        text=get_text("dialog.about.copy_diagnostics", "Copy diagnostics"),
+        command=lambda: _copy_diagnostics(parent, get_text),
+    ).pack(anchor="w", pady=(8, 0))
+
+    ttk.Button(frm, text=get_text("dialog.about.close", "Close"), command=top.destroy).pack(
+        anchor="e", pady=(8, 0)
     )
-    info.pack(anchor="w", pady=(0, 8))
-
-    def _tool_info(cmd: str, version_args: list[str]) -> list[str]:
-        out: list[str] = []
-        path = resolve_tool_path(cmd)
-        if not path:
-            out.append(f"{cmd}: not found")
-            return out
-        out.append(f"{cmd}: {path}")
-        try:
-            p = subprocess.run([path, *version_args], capture_output=True, text=True, check=False)
-            first = (
-                p.stdout.splitlines()[0]
-                if p.stdout.strip()
-                else (p.stderr.splitlines()[0] if p.stderr.strip() else "(no output)")
-            )
-            out.append(f"{cmd} version: {first}")
-        except Exception as e:
-            out.append(f"{cmd} version: error: {e}")
-        return out
-
-    def _copy_diagnostics() -> None:
-        lines: list[str] = []
-        for tool, args in [
-            ("yt-dlp", ["--version"]),
-            ("ffmpeg", ["-version"]),
-            ("ffprobe", ["-version"]),
-            ("mp3gain", ["-v"]),
-        ]:
-            lines.extend(_tool_info(tool, args))
-        try:
-            parent.clipboard_clear()
-            parent.clipboard_append("\n".join(lines))
-        except Exception:
-            pass
-        messagebox.showinfo(
-            get_text("dialog.copied.title", "Diagnostics copied"),
-            get_text("dialog.copied.body", "Diagnostic info copied to clipboard."),
-        )
-
-    btns = ttk.Frame(frm)
-    btns.pack(fill="x", pady=(8, 0))
-    ttk.Button(btns, text=get_text("dialog.about.copy_diagnostics", "Copy diagnostics"), command=_copy_diagnostics).pack(
-        side="left"
-    )
-    ttk.Button(btns, text=get_text("dialog.about.close", "Close"), command=top.destroy).pack(side="right")
 
     _center_on_screen(top)
+    top.grab_set()
+    top.wait_window()
