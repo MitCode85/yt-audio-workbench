@@ -1,6 +1,6 @@
-# YT-Audio-Workbench
+# YT Audio Workbench
 
-> Reliability-first, cross-platform (Windows/macOS/Linux) Python GUI for yt-dlp + FFmpeg with optional MP3Gain. Turn YouTube videos & playlists into high-quality MP3 with proper ID3 tags, loudness normalization (ReplayGain), playlist/CUE options, robust tool checks, and multilingual support (i18n: EN/FR) support.
+> Reliability-first, cross-platform (Windows/macOS/Linux) Python GUI for yt-dlp + FFmpeg with optional MP3Gain. Convert YouTube videos & playlists into high-quality MP3 with proper ID3 tags, ReplayGain loudness normalization, playlist/CUE options, robust tool checks, and multilingual (i18n: EN/FR) support.
 
 ## Features
 - **Reliability-first pipeline**: robust tool checks, clear error messages, cancellable jobs, logs.
@@ -73,3 +73,8 @@ PRs welcome! Please run tests:
 pip install pytest
 pytest -q
 ```
+
+
+## Downloads
+- Unsigned binaries are produced by CI for Windows, macOS (x64 & arm64), and Linux. See **Actions → Build** artifacts or tagged releases.
+- macOS Gatekeeper: right‑click → Open the first time. Windows SmartScreen: choose **More info → Run anyway**.

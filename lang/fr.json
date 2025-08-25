@@ -1,0 +1,137 @@
+{
+  "meta": {
+    "name": "Français",
+    "code": "fr"
+  },
+  "app_title": "YT Audio Workbench",
+  "frames": {
+    "url": "URL",
+    "output": "Sortie",
+    "options": "Options",
+    "joining": "Assemblage",
+    "cookies": "Cookies",
+    "controls": "Commandes",
+    "log": "Journal"
+  },
+  "labels": {
+    "url": "URL de la playlist ou de la vidéo :",
+    "output_folder": "Dossier de sortie :",
+    "sample_rate": "Fréquence d’échantillonnage :",
+    "bitrate": "Débit (kb/s) :",
+    "delay_between_items": "Délai entre les éléments (s) :",
+    "playlist_format": "Format de playlist :",
+    "join_name": "Nom :",
+    "cookies_file": "Fichier cookies.txt :",
+    "cookies_browser": "Navigateur :"
+  },
+  "checkboxes": {
+    "use_run_subdir": "Utiliser un sous-dossier par exécution (recommandé)",
+    "add_numbering": "Ajouter une numérotation",
+    "fallback_numbering": "Numérotation de secours",
+    "sanitize_filenames": "Nettoyer les noms de fichiers (compatibilité maximale)",
+    "embed_metadata": "Intégrer les métadonnées",
+    "write_cue": "Écrire un fichier CUE",
+    "embed_chapters": "Intégrer les chapitres",
+    "vlc_segments": "Playlist de segments VLC",
+    "random_join": "Aléatoiriser l’ordre d’assemblage",
+    "include_id": "Inclure l’ID vidéo dans le nom",
+    "archive": "Maintenir un journal des téléchargements (ignorer l’existant)",
+    "validate_sr": "Valider la fréquence d’échant.",
+    "verbose_logging": "Journalisation détaillée de yt-dlp"
+  },
+  "buttons": {
+    "run": "Lancer",
+    "cancel": "Annuler",
+    "browse": "Parcourir…",
+    "verify_tools": "Vérifier les outils",
+    "check_install_deps": "Vérifier/installer les dépendances",
+    "open_output": "Ouvrir le dossier",
+    "open_log": "Ouvrir le journal",
+    "open_help": "Ouvrir l’aide",
+    "convert_cookies": "Convertir JSON → cookies.txt"
+  },
+  "combos": {
+    "cookies_browser": {
+      "none": "Aucun",
+      "chrome": "Chrome",
+      "edge": "Edge",
+      "firefox": "Firefox",
+      "brave": "Brave"
+    },
+    "playlist_format": {
+      "M3U8": "M3U8",
+      "M3U": "M3U",
+      "PLS": "PLS"
+    }
+  },
+  "tooltips": {
+    "url_entry": "Collez l’URL complète d’une vidéo ou d’une playlist YouTube ici. Clic droit pour le menu contextuel.",
+    "output_folder_entry": "Sélectionnez le dossier principal où seront enregistrés les fichiers, journaux et sous-dossiers.",
+    "use_run_subdir": "Crée un sous-dossier daté pour chaque exécution afin de garder les fichiers organisés.",
+    "add_numbering": "Ajoute 001‑, 002‑, … au début des pistes, dans l’ordre de la playlist.",
+    "fallback_numbering": "Si l’ordre de la playlist est incertain, utilise une numérotation simple.",
+    "sanitize_filenames_checkbox": "Recommandé. Supprime les caractères spéciaux pour une compatibilité maximale avec tous les lecteurs.",
+    "embed_metadata": "Écrit les balises ID3 (titre, artiste, album, pochette si disponible).",
+    "write_cue": "Génère un fichier .cue correspondant au fichier assemblé.",
+    "embed_chapters": "Ajoute des chapitres ID3 pour naviguer dans un fichier assemblé.",
+    "vlc_segments": "Crée une playlist de segments lisible par VLC au lieu d’un fichier unique.",
+    "random_join": "Mélange l’ordre des pistes lors de l’assemblage.",
+    "join_name_entry": "Nom du fichier final lors de l’option « Assemblage ».",
+    "cookies_file_entry": "Sélectionnez un cookies.txt (format Netscape) ou convertissez un JSON de navigateur.",
+    "cookies_browser_combo": "Choisissez un navigateur pour utiliser automatiquement ses cookies.",
+    "verify_tools_button": "Vérifie la présence de ffmpeg, yt-dlp, mp3gain (facultatif), etc.",
+    "run_button": "Démarre le téléchargement et le traitement.",
+    "cancel_button": "Interrompt la tâche en cours ; des fichiers partiels peuvent rester.",
+    "sample_rate_combo": "Impose une fréquence d’échantillonnage audio cohérente. 44100 Hz est la norme qualité CD.",
+    "bitrate_combo": "Définit la qualité du fichier MP3. 192 est une bonne qualité, 320 est la plus élevée.",
+    "delay_spinbox": "Fait une pause entre les téléchargements d’une playlist pour éviter les limites de débit.",
+    "playlist_format_combo": "Crée un fichier playlist pour toutes les pistes téléchargées.",
+    "check_deps_button": "Tente d’installer automatiquement les dépendances manquantes (p. ex. via winget sur Windows).",
+    "checkboxes": {
+      "join_into_one": "Active la combinaison de tous les éléments en un seul MP3 (style album)."
+    },
+    "paste_button": "Colle le contenu du presse‑papiers dans ce champ.",
+    "browse_output_button": "Ouvre un sélecteur de dossier pour le répertoire de sortie.",
+    "browse_cookies_button": "Ouvre un sélecteur de fichier pour choisir un fichier de cookies.",
+    "open_log_button": "Ouvre le dernier fichier journal dans votre éditeur par défaut.",
+    "copy_log_button": "Copie le texte du journal visible dans le presse‑papiers."
+  },
+  "messages": {
+    "idle": "Au repos",
+    "running": "En cours d’exécution…",
+    "verifying_tools": "Vérification des outils…",
+    "cancelled": "Annulé",
+    "completed": "Terminé",
+    "error": "Erreur",
+    "preparing": "Préparation…",
+    "downloading": "Téléchargement…",
+    "joining": "Assemblage…",
+    "normalizing": "Normalisation (mp3gain)…",
+    "saving_log": "Enregistrement du journal…"
+  },
+  "menu": {
+    "help": "Aide",
+    "open_help": "Ouvrir l’aide",
+    "copy_diagnostics": "Copier les informations de diagnostic",
+    "about": "À propos",
+    "language": "Langue"
+  },
+  "dialog": {
+    "about": {
+      "title": "À propos",
+      "version": "Version : {version}",
+      "copy_diagnostics": "Copier les informations de diagnostic",
+      "open_troubleshooting": "Ouvrir Aide → Dépannage",
+      "close": "Fermer"
+    },
+    "help": {
+      "title": "Aide — {app}",
+      "search": "Rechercher :",
+      "not_found": "Fichier d’aide introuvable."
+    },
+    "copied": {
+      "title": "Diagnostics copiés",
+      "body": "Informations de diagnostic copiées dans le presse‑papiers."
+    }
+  }
+}

@@ -1,0 +1,36 @@
+[project]
+name = "yt-audio-backup-gui"
+version = "0.1.0"
+description = "A reliable, security-conscious GUI for backing up YouTube playlists as MP3."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Your Name" }]
+license = { text = "MIT" }
+dependencies = [
+  "yt-dlp>=2025.1.1",
+
+    \"mutagen>=1.46\",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+select = ["E","F","I","UP"]
+ignore = ["E501"]
+
+[tool.ruff.isort]
+known-first-party = ["yt_audio_backup_gui"]
+combine-as-imports = true
+
+[tool.mypy]
+python_version = "3.9"
+ignore_missing_imports = true
+warn_unused_ignores = false
+strict = false
+
+[tool.bandit]
+skips = ["B101"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
