@@ -76,6 +76,7 @@ from tkinter import ttk, filedialog, messagebox
 from tkinter.scrolledtext import ScrolledText
 from pathlib import Path
 from ui_extras import add_help_right_aligned_menu
+import shutil as _sh
 
 APP_NAME = "YT Audio Workbench"
 VERSION = "0.1.8n-p9b"
@@ -939,6 +940,19 @@ class App(tk.Tk):
 
         try:
             self._load_config()
+        except Exception:
+            pass
+        # Apply saved locale after config load (reuse existing change_language path)
+        try:
+            saved_locale = None
+            if hasattr(self, "config") and isinstance(self.config, dict):
+                for _k in ("locale", "language", "lang"):
+                    _v = self.config.get(_k)
+                    if isinstance(_v, str) and _v.strip():
+                        saved_locale = _v.strip()
+                        break
+            if saved_locale and saved_locale != getattr(self, "current_language", None):
+                self.change_language(saved_locale)
         except Exception:
             pass
         self.protocol("WM_DELETE_WINDOW", self._on_close)
@@ -1813,7 +1827,7 @@ class App(tk.Tk):
             self.log(f"Config save failed: {e}")
 
         def _check_install_deps(self) -> None:
-            import threading, subprocess, shutil as _sh
+            import threading, subprocess
 
             missing = [n for n in ["yt-dlp", "ffmpeg", "ffprobe", "mp3gain"] if not _sh.which(n)]
             if not missing:
