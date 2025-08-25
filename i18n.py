@@ -1,33 +1,34 @@
-
 from __future__ import annotations
+
 import json
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 class Language:
-    def __init__(self, lang_dir: Path, code: str = "en") -> None:
+    """Tiny JSON-based language lookup with dot-path keys, e.g. 'tooltips.sample_rate'."""
+
+    def __init__(self, lang_dir: str | Path, code: str = "en") -> None:
         self.lang_dir = Path(lang_dir)
         self.code = code
-        self._data: Dict[str, Any] = {}
+        self._data: dict[str, Any] = {}
         self.load(self.code)
 
     def load(self, code: str) -> None:
-        self.code = code
-        path = self.lang_dir / f"{code}.json"
         self._data = {}
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            path = self.lang_dir / f"{code}.json"
+            with open(path, encoding="utf-8") as f:
                 self._data = json.load(f)
         except Exception:
-            # fallback to English if available
+            # fall back to English if not present
             if code != "en":
                 try:
-                    with open(self.lang_dir / "en.json", "r", encoding="utf-8") as f:
+                    with open(self.lang_dir / "en.json", encoding="utf-8") as f:
                         self._data = json.load(f)
                 except Exception:
                     self._data = {}
 
-    def get(self, key: str, default: Optional[str] = None) -> Optional[str]:
+    def get(self, key: str, default: str | None = None) -> str | None:
         # Resolve dot path
         cur: Any = self._data
         for part in key.split("."):
@@ -39,11 +40,10 @@ class Language:
             return str(cur)
         return default
 
-    def available_locales(self) -> Dict[str, Path]:
-        locales = {}
+    def available_locales(self) -> dict[str, Path]:
+        locales: dict[str, Path] = {}
         if not self.lang_dir.exists():
             return locales
         for p in self.lang_dir.glob("*.json"):
-            code = p.stem
-            locales[code] = p
-        return dict(sorted(locales.items()))
+            locales[p.stem] = p
+        return locales
