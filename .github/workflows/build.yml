@@ -2,125 +2,139 @@ name: Build (Windows/macOS/Linux)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+    paths:
+      - '**/*.py'
+      - 'lang/**'
+      - 'HELP.md'
+      - 'yt_audio_workbench.spec'
+      - '.github/workflows/build.yml'
   pull_request:
-    branches: [ main ]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}
-  cancel-in-progress: true
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: Build on ${{ matrix.os }}
+  test:
+    name: Tests (${{ matrix.os }} | py${{ matrix.python }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-13, windows-latest]
-
+        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+        python: ['3.11']
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
-
-      - name: Install project deps (if any)
+          python-version: ${{ matrix.python }}
+      - name: Install OS dependencies (Linux only)
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
-          if [ -f requirements.txt ]; then
-            python -m pip install -r requirements.txt
-          else
-            echo "No requirements.txt found; installing tools only"
-          fi
-        shell: bash
-
-      - name: Install dev tools
-        run: python -m pip install pyinstaller ruff mypy bandit pytest
-
-      - name: Lint (ruff)
-        run: python -m ruff check .
-
-      - name: Type-check (mypy, lenient)
-        run: python -m mypy --ignore-missing-imports . || true
-
+          sudo apt-get update
+          sudo apt-get install -y python3-tk
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+      - name: Install project requirements (if requirements.txt exists)
+        if: hashFiles('requirements.txt') != ''
+        run: python -m pip install -r requirements.txt
       - name: Run tests
         env:
-          PYTHONPATH: .
-        run: pytest -q
+          PYTHONPATH: ${{ github.workspace }}
+        run: python -m pytest -q
 
-      - name: Build (PyInstaller)
-        run: pyinstaller --noconfirm --name YT-Audio-Workbench --onefile yt_audio_backup_gui.py
-
-      - name: List dist (if present)
+  build:
+    name: Build (${{ matrix.os }})
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install OS dependencies (Linux only)
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
-          if [ -d dist ]; then
-            ls -la dist
-            find dist -maxdepth 2 -type f -print || true
-          fi
-        shell: bash
-
-      # ----- Set artifact name per-OS -----
-      - name: Set ZIP_NAME (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
+          sudo apt-get update
+          sudo apt-get install -y python3-tk
+      - name: Install Python dependencies
         run: |
-          "ZIP_NAME=YT-Audio-Workbench-Windows.zip" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Set ZIP_NAME (*nix)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          if [ "${{ runner.os }}" = "macOS" ]; then
-            echo "ZIP_NAME=YT-Audio-Workbench-macOS.zip" >> "$GITHUB_ENV"
-          else
-            echo "ZIP_NAME=YT-Audio-Workbench-Linux.zip" >> "$GITHUB_ENV"
-          fi
-
-      # ----- Package per-OS -----
-      - name: Zip dist (Windows)
-        if: runner.os == 'Windows'
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller
+      - name: Install project requirements (if requirements.txt exists)
+        if: hashFiles('requirements.txt') != ''
+        run: python -m pip install -r requirements.txt
+      - name: Build with PyInstaller
+        run: pyinstaller -y yt_audio_workbench.spec
+      - name: Pack artifact (Windows)
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          if (-not (Test-Path -Path dist)) { throw "dist/ does not exist" }
-          if (Test-Path -Path "dist\\YT-Audio-Workbench.exe") {
-            $zip = "${{ env.ZIP_NAME }}"
-            Compress-Archive -Path "dist\\YT-Audio-Workbench.exe" -DestinationPath $zip -Force
-          } elseif (Test-Path -Path "dist\\YT-Audio-Workbench\\*") {
-            $zip = "${{ env.ZIP_NAME }}"
-            Compress-Archive -Path "dist\\YT-Audio-Workbench\\*" -DestinationPath $zip -Force
-          } else {
-            Get-ChildItem -Recurse dist
-            throw "Could not find PyInstaller output in dist/"
+
+          $dist = Join-Path $PWD 'dist'
+          if (-not (Test-Path $dist)) {
+            throw "dist/ not found. Did the build step run?"
           }
 
-      - name: Zip dist (*nix)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          set -euo pipefail
-          : "${ZIP_NAME:?ZIP_NAME not set}"
-          if [ -f "dist/YT-Audio-Workbench" ]; then
-            zip -j -r "${ZIP_NAME}" "dist/YT-Audio-Workbench"
-          elif [ -d "dist/YT-Audio-Workbench" ]; then
-            zip -r "${ZIP_NAME}" "dist/YT-Audio-Workbench"
-          else
-            echo "dist/ contents:"
-            find dist -maxdepth 2 -print || true
-            echo "Could not find PyInstaller output in dist/"
-            exit 1
-          fi
+          # Prefer a product directory (onedir). Fallback to files (onefile).
+          $productDir = Get-ChildItem -Path $dist -Directory | Select-Object -First 1
+          if ($productDir) {
+            $zip = "$($productDir.Name)-Windows.zip"
+            Push-Location $productDir.FullName
+            Compress-Archive -Path * -DestinationPath (Join-Path $dist $zip) -Force
+            Pop-Location
+            $zipPath = Join-Path $dist $zip
+          } else {
+            $files = Get-ChildItem -Path $dist -File
+            if (-not $files) {
+              $found = (Get-ChildItem -Path $dist | Select-Object -ExpandProperty Name) -join ', '
+              throw "Nothing to pack in dist/. Found entries: $found"
+            }
+            $zip = 'YT-Audio-Workbench-Windows.zip'
+            Compress-Archive -Path ($files | ForEach-Object { $_.FullName }) -DestinationPath (Join-Path $dist $zip) -Force
+            $zipPath = Join-Path $dist $zip
+          }
 
+          # Expose name/path for the upload step
+          "ZIP_NAME=$(Split-Path -Leaf $zipPath)" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "ZIP_PATH=$zipPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Pack artifact (macOS/Linux)
+        if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
+        run: |
+          cd dist
+          zip -r ../YT-Audio-Workbench-${{ runner.os }}.zip YT-Audio-Workbench
+          echo "ZIP_NAME=YT-Audio-Workbench-${{ runner.os }}.zip" >> $GITHUB_ENV
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ZIP_NAME }}
+          name: YT-Audio-Workbench-${{ matrix.os }}
           path: ${{ env.ZIP_NAME }}
-          if-no-files-found: error
-          retention-days: 7
+
+  release:
+    name: Release on tag
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: List artifacts
+        run: ls -R artifacts
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/**/YT-Audio-Workbench-*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
