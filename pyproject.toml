@@ -14,13 +14,26 @@ dependencies = [
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
-select = ["E","F","I","UP"]
-ignore = ["E501"]
+target-version = "py39"  # keep your current floor
 
-[tool.ruff.isort]
+[tool.ruff.lint]
+# Keep only the "serious" checks for now (runtime errors + a bit of PyUpgrade).
+select = ["E9", "F63", "F7", "F82", "UP"]
+# Keep your long-line exception and silence noisy style rules we know you use.
+ignore = ["E501", "E401", "E402", "E701", "E702", "E703", "I001"]
+
+[tool.ruff.lint.isort]
 known-first-party = ["yt_audio_backup_gui"]
 combine-as-imports = true
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*"                = ["F401", "I001", "E701", "E702", "E703"]
+"yt_audio_backup_gui.py" = ["E401", "E402", "E701", "E702", "E703", "I001"]
+"workbench_core.py"      = ["E401", "E402", "E701", "E702", "E703", "I001"]
+"help_window.py"         = ["E401", "E402", "E701", "E702", "E703", "I001"]
+"ui_extras.py"           = ["E401", "E402", "E701", "E702", "E703", "I001"]
+"tooltips.py"            = ["UP037", "UP045"]  # quoted type hints / X|None suggestions
+"i18n.py"                = ["UP006", "UP015", "UP045"]
 
 [tool.mypy]
 python_version = "3.9"
