@@ -40,6 +40,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install pytest
       - name: Run tests
+        env:
+          PYTHONPATH: .
         run: pytest -q
 
   build:
