@@ -16,7 +16,7 @@ Everything is written conservatively to satisfy ruff (E,F,I,UP) and Pylance.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
+from collections.abc import Callable
 
 import json
 import queue
