@@ -781,11 +781,11 @@ class App(tk.Tk):
 
         self.status_var = tk.StringVar(value="Idle")
         self.progress_var = tk.IntVar(value=0)
-        self._progress_q: "queue.Queue[dict]" = queue.Queue()
+        self._progress_q: queue.Queue[dict] = queue.Queue()
         self._progress_total = 0
         self._progress_done = 0
 
-        self._log_q: "queue.Queue[str]" = queue.Queue()
+        self._log_q: queue.Queue[str] = queue.Queue()
         self.file_log_fp = None
         self.log_file_path: Path | None = None
 
