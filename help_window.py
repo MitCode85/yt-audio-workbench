@@ -43,11 +43,12 @@ def _tool_info(cmd: str, version_args: list[str]) -> list[str]:
 
         p = subprocess.run(
             [path, *version_args],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             text=True,
             check=False,
+            timeout=3, # It's also good practice to include a timeout
         )
+
         first = (
             p.stdout.splitlines()[0]
             if p.stdout.strip()
