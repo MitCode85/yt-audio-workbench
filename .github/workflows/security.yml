@@ -1,0 +1,29 @@
+name: Security Scan (Bandit)
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'  # Mondays 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  bandit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Bandit + SARIF formatter
+        run: pip install bandit bandit-sarif-formatter
+      - name: Run Bandit
+        run: |
+          bandit -r . -f json -o bandit.json || true
+          bandit-sarif-formatter bandit.json bandit.sarif
+      - name: Upload SARIF to code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: bandit.sarif
