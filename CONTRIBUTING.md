@@ -4,7 +4,7 @@ Thank you for your interest in contributing!
 
 ## Development Setup
 
-- Python 3.9+ required
+- Python 3.11+ required
 - Recommended: [uv](https://github.com/astral-sh/uv) for environment management
 
 ```bash
