@@ -132,13 +132,13 @@ jobs:
           first_dir="$(find "$dist" -mindepth 1 -maxdepth 1 -type d | head -n1 || true)"
           if [[ -n "${first_dir:-}" ]]; then
             base="$(basename "$first_dir")"
-            zip_path="$dist/${base}-${{ runner.os }}.zip"
+            zip_path="$dist/${base}-${{ matrix.os }}.zip"
             (cd "$first_dir" && zip -r "../$(basename "$zip_path")" .)
           else
             if ! find "$dist" -mindepth 1 -maxdepth 1 -type f | grep -q .; then
               echo "Nothing to pack in dist/"; exit 1
             fi
-            zip_path="$dist/YT-Audio-Workbench-${{ runner.os }}.zip"
+            zip_path="$dist/YT-Audio-Workbench-${{ matrix.os }}.zip"
             (cd "$dist" && zip -r "$(basename "$zip_path")" .)
           fi
           echo "ZIP_PATH=$zip_path" >> "$GITHUB_ENV"
