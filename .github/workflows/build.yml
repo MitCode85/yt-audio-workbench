@@ -3,8 +3,7 @@ name: Build (Windows/macOS/Linux)
 on:
   push:
     branches: [ main, master ]
-    tags:
-      - 'v*'
+    tags: [ 'v*' ]
     paths:
       - '**/*.py'
       - 'lang/**'
@@ -29,18 +28,22 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+
       - name: Install OS dependencies (Linux only)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-tk
-      - name: Install Python dependencies
+
+      - name: Install Python deps for tests
         run: |
           python -m pip install --upgrade pip
           python -m pip install pytest
+
       - name: Install project requirements (if requirements.txt exists)
         if: hashFiles('requirements.txt') != ''
         run: python -m pip install -r requirements.txt
+
       - name: Run tests
         env:
           PYTHONPATH: ${{ github.workspace }}
@@ -59,32 +62,43 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Install OS dependencies (Linux only)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-tk
-      - name: Install Python dependencies
+          sudo apt-get install -y python3-tk zip
+
+      - name: Install Python deps for build
         run: |
           python -m pip install --upgrade pip
           python -m pip install pyinstaller
+
       - name: Install project requirements (if requirements.txt exists)
         if: hashFiles('requirements.txt') != ''
         run: python -m pip install -r requirements.txt
+
       - name: Build with PyInstaller
         run: pyinstaller -y yt_audio_workbench.spec
+
+      - name: Show dist tree (debug)
+        shell: bash
+        run: |
+          echo "== dist/ contents =="
+          ls -la dist || true
+          echo "== one level deeper =="
+          find dist -maxdepth 2 -mindepth 1 -print || true
+
+      # ---------- Windows pack ----------
       - name: Pack artifact (Windows)
-        if: runner.os == 'Windows' # Or: if: startsWith(matrix.os, 'windows')
+        if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-
           $dist = Join-Path $PWD 'dist'
-          if (-not (Test-Path $dist)) {
-            throw "dist/ not found. Did the build step run?"
-          }
+          if (-not (Test-Path $dist)) { throw "dist/ not found. Did the build step run?" }
 
-          # Prefer a product directory (onedir). Fallback to files (onefile).
+          # Prefer onedir folder; fallback to onefile(s)
           $productDir = Get-ChildItem -Path $dist -Directory | Select-Object -First 1
           if ($productDir) {
             $zip = "$($productDir.Name)-Windows.zip"
@@ -103,22 +117,40 @@ jobs:
             $zipPath = Join-Path $dist $zip
           }
 
-          # Expose name/path for the upload step
-          "ZIP_NAME=$(Split-Path -Leaf $zipPath)" | Out-File -FilePath $env:GITHUB_ENV -Append
           "ZIP_PATH=$zipPath" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      # ---------- macOS / Linux pack ----------
       - name: Pack artifact (macOS/Linux)
-        if: startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu')
+        if: runner.os != 'Windows'
+        shell: bash
         run: |
-          ZIP_FILENAME="YT-Audio-Workbench-${{ matrix.os }}.zip"
-          cd dist
-          zip -r ../"$ZIP_FILENAME" YT-Audio-Workbench
-          echo "ZIP_PATH=$ZIP_FILENAME" >> $GITHUB_ENV
+          set -euo pipefail
+          dist="dist"
+          [[ -d "$dist" ]] || { echo "dist/ not found"; exit 1; }
+
+          # Prefer an app folder (onedir). If none, zip all files (onefile case).
+          first_dir="$(find "$dist" -mindepth 1 -maxdepth 1 -type d | head -n1 || true)"
+          if [[ -n "${first_dir:-}" ]]; then
+            base="$(basename "$first_dir")"
+            zip_path="$dist/${base}-${{ runner.os }}.zip"
+            (cd "$first_dir" && zip -r "../$(basename "$zip_path")" .)
+          else
+            if ! find "$dist" -mindepth 1 -maxdepth 1 -type f | grep -q .; then
+              echo "Nothing to pack in dist/"; exit 1
+            fi
+            zip_path="$dist/YT-Audio-Workbench-${{ runner.os }}.zip"
+            (cd "$dist" && zip -r "$(basename "$zip_path")" .)
+          fi
+          echo "ZIP_PATH=$zip_path" >> "$GITHUB_ENV"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: YT-Audio-Workbench-${{ matrix.os }}
+          # unique name prevents 409 conflicts between matrix jobs
+          name: YT-Audio-Workbench-${{ runner.os }}-${{ github.run_number }}
           path: ${{ env.ZIP_PATH }}
+          if-no-files-found: error
+          retention-days: 7
 
   release:
     name: Release on tag
