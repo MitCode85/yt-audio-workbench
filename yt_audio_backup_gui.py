@@ -37,6 +37,10 @@ from workbench_core import (
     run_quiet,
     CURRENT_PROCS,
     CURRENT_PROCS_LOCK,
+    CANCEL_EVENT,
+    terminate_all_procs,
+    ProcessingOptions,
+    run_processing_task,
 )
 
 
