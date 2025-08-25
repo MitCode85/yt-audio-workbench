@@ -470,8 +470,8 @@ class ProcessingOptions:
 
 def run_processing_task(
     options: ProcessingOptions,
-    log_queue: "queue.Queue[str]",
-    progress_queue: "queue.Queue[dict]",
+    log_queue: queue.Queue[str],
+    progress_queue: queue.Queue[dict],
     cancel_event: threading.Event,
 ) -> None:
     """
