@@ -304,6 +304,9 @@ class App(tk.Tk):
                 cmd.extend(["--sleep-interval", str(options.sleep_between)])
             if options.verbose_ydl:
                 cmd.append("--verbose")
+            if options.hi_integrity:
+                _log("High integrity mode enabled: wip - to be implemented.")
+                cmd.extend([""])
             if cookies_arg:
                 cmd.extend(["--cookies", cookies_arg])
             elif options.cookies_browser and options.cookies_browser.lower() != "none":
@@ -1213,6 +1216,7 @@ class App(tk.Tk):
             keep_temp_wavs=bool(self.keep_temp_var.get()),
             sleep_between=int(self.sleep_between_var.get()),
             verbose_ydl=bool(self.verbose_ydl_var.get()),
+            hi_integrity=bool(self.hi_integrity_var.get()),
             cookies_file=Path(self.cookies_file_var.get()) if self.cookies_file_var.get() else None,
             cookies_browser=str(self.cookies_browser_var.get()),
             playlist_format=str(self.playlist_format_var.get()),
