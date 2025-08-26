@@ -565,6 +565,30 @@ def get_album_name(files: list[Path]) -> str:
 # -----------------------
 
 
+def prepare_cookies(
+    cookies_file: Path | None,
+    cookies_browser: str | None,
+    working_dir: Path,
+    log: Callable[[str], None] | None = None,
+) -> Path | None:
+    """
+    If a JSON from Cookie-Editor is provided, convert to Netscape text and return that path.
+    If a browser name is provided, return None (yt-dlp will use --cookies-from-browser).
+    Otherwise, return the original cookies_file.
+    """
+    if cookies_file and cookies_file.suffix.lower() == ".json":
+        out = working_dir / "cookies.txt"
+        converted_path = convert_cookie_editor_json_to_netscape(cookies_file, out, log=log)
+        return converted_path
+
+    if cookies_browser and cookies_browser.lower() != "none":
+        if log:
+            log(f"[cookies] using cookies from browser: {cookies_browser}")
+        return None
+
+    return cookies_file
+
+
 def convert_cookie_editor_json_to_netscape(json_path: Path, out_txt: Path, log) -> Path:
     """Convert Cookie-Editor/EditThisCookie JSON into a Netscape cookies.txt with header."""
     try:
