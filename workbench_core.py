@@ -589,6 +589,9 @@ def prepare_cookies(
     return cookies_file
 
 
+# In workbench_core.py
+
+
 def convert_cookie_editor_json_to_netscape(json_path: Path, out_txt: Path, log) -> Path:
     """Convert Cookie-Editor/EditThisCookie JSON into a Netscape cookies.txt with header."""
     try:
@@ -629,10 +632,15 @@ def convert_cookie_editor_json_to_netscape(json_path: Path, out_txt: Path, log) 
             domain_field = ("#HttpOnly_" + domain) if c.get("httpOnly") else domain
             lines.append("\t".join([domain_field, include_sub, path, https, str(exp), name, value]))
         out_txt.write_text(header + "\n".join(lines) + "\n", encoding="utf-8")
-        log(f"Converted JSON cookies -> {out_txt}")
+
+        # vvv FIX IS HERE vvv
+        if log:
+            log(f"Converted JSON cookies -> {out_txt}")
         return out_txt
     except Exception as e:
-        log(f"Cookie JSON convert failed: {e}")
+        # vvv AND FIX IS HERE vvv
+        if log:
+            log(f"Cookie JSON convert failed: {e}")
         return out_txt
 
 
