@@ -346,7 +346,7 @@ def check_and_install_deps(log: Callable[[str], None] | None = None) -> None:
         encoding="utf-8",
     )
     try:
-        os.chmod(sh, 0o755)
+        os.chmod(sh, 0o700)
     except Exception:
         pass
     log(f"Wrote helper installation scripts to: {scripts_dir}")
