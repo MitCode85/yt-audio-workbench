@@ -327,7 +327,7 @@ def check_and_install_deps(log: Callable[[str], None] | None = None) -> None:
                 log(f"Install step failed: {e}")
         log("If tools are still not detected, you may need to restart your shell/terminal.")
 
-    # Write helper scripts for manual installation
+    # Write helper scripts for manual installation.
     ps1 = scripts_dir / "install_deps.ps1"
     ps1.write_text(
         "winget source update\n"

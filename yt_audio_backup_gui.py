@@ -1239,7 +1239,7 @@ class App(tk.Tk):
 
         def worker():
             try:
-                check_and_install_deps()
+                check_and_install_deps(log=self.log)
             finally:
                 self._busy_install = False
                 self.status_var.set("Idle")
