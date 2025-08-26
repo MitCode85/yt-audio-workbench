@@ -29,10 +29,12 @@ from workbench_core import (
     terminate_all_procs,
     verify_tools,
     check_and_install_deps,
+    have,
     # File & Audio Logic
     _sanitize_and_rename,
     _dedup_artist_in_filenames,
     join_via_wav_then_lame,
+    validate_sample_rates,
     write_id3_tags_mutagen,
     # Playlist & Chapter Logic
     write_playlist,
@@ -355,6 +357,8 @@ class App(tk.Tk):
                     write_id3_tags_mutagen(downloaded_files, album_name, _log)
                 if options.dedup_artist:
                     downloaded_files = _dedup_artist_in_filenames(downloaded_files, _log)
+                if options.validate_sr:
+                    validate_sample_rates(downloaded_files, options.sample_rate, _log)
                 if options.join:
                     _progress(85, "Joining files...")
                     joined_file = join_via_wav_then_lame(
@@ -362,7 +366,7 @@ class App(tk.Tk):
                         outdir=outdir,
                         sr=options.sample_rate,
                         br_kbps=options.bitrate,
-                        join_name="album_joined",
+                        join_name=options.join_name,
                         log=_log,
                         shuffle=options.random_join,
                         keep_temp=options.keep_temp_wavs,
@@ -378,6 +382,24 @@ class App(tk.Tk):
                     write_playlist(
                         outdir, downloaded_files, _log, "playlist", options.playlist_format
                     )
+
+                if options.mp3gain:
+                    _progress(95, "Normalizing volume...")
+                    _log("Applying MP3Gain normalization...")
+                    # Note: We need to import 'have' from the core for this to work
+                    if have("mp3gain"):
+                        files_to_normalize = (
+                            [joined_file]
+                            if options.join and 'joined_file' in locals()
+                            else downloaded_files
+                        )
+                        for f in files_to_normalize:
+                            try:
+                                run_capture(["mp3gain", "-r", "-k", "-p", str(f)])
+                            except Exception as e:
+                                _log(f"mp3gain failed for {f.name}: {e}")
+                    else:
+                        _log("mp3gain not found, skipping normalization.")
 
             _progress(100, "Done")
             _log("Run finished successfully.")
