@@ -17,7 +17,7 @@ a = Analysis(
     datas=[
         ('lang/en.json', 'lang'),
         ('lang/fr.json', 'lang'),
-        ('HELP.md', '.'),
+        ('docs/HELP.md', 'docs'),
     ],
     hiddenimports=collect_submodules('tkinter'),
     hookspath=[],
