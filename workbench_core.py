@@ -230,7 +230,7 @@ def run_quiet(
     Run and return (rc, stderr_tail). Keeps last lines of stderr for diagnostics.
     """
     try:
-        rc, _out, err = _run_capture(cmd, timeout=timeout, check=False, cwd=cwd)
+        rc, _, err = _run_capture(cmd, timeout=timeout, check=False, cwd=cwd)
     except subprocess.CalledProcessError as e:
         # shouldn't happen because check=False above, but just in case
         return e.returncode, _last_lines(e.stderr or "")

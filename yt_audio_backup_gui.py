@@ -201,7 +201,7 @@ class App(tk.Tk):
                 self,
                 app_name=APP_NAME,
                 version=VERSION,
-                help_md_path=Path(__file__).with_name('HELP.md'),
+                help_md_path=Path(__file__).parent / "docs" / "HELP.md",
                 get_text=lambda k, f: self.lang.get(k, f),
                 locales=self.lang.available_locales(),
                 on_switch_language=self.change_language,
