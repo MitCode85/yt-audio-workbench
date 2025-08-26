@@ -30,6 +30,7 @@ from workbench_core import (
     verify_tools,
     check_and_install_deps,
     have,
+    spawn_streaming,
     # File & Audio Logic
     _sanitize_and_rename,
     _dedup_artist_in_filenames,
@@ -208,30 +209,36 @@ class App(tk.Tk):
         except Exception:
             pass
 
-    def change_language(self, code: str) -> None:
+    def change_language(self, code: str, persist: bool = True) -> None:
         try:
             self.lang.load(code)
             self.current_language = code
         except Exception:
             return
+
         # Update window title
         try:
             self.title(f"{self.lang.get('app_title', 'YT Audio Workbench')} v{VERSION}")
         except Exception:
             pass
+
         # Rebuild help bar to update menu labels and selection
         self._rebuild_help_bar()
+
         # Reset tooltips before UI rebuild to prevent after() against destroyed widgets
         try:
             reset_tooltips()
         except Exception:
             pass
-        # Persist language choice
-        try:
-            self._save_config()
-        except Exception:
-            pass
-        # Optional: rebuild the rest of UI when all widgets read from language file.
+
+        # Only write config when this is a real user-initiated language change
+        if persist:
+            try:
+                self._save_config()
+            except Exception:
+                pass
+
+        # Rebuild the rest of the UI with the current language
         self._rebuild_main_ui()
 
     def _center_main_on_screen(self):
@@ -316,14 +323,7 @@ class App(tk.Tk):
             # 3. Run yt-dlp and stream output for progress
             _log(f"Running command: {' '.join(cmd)}")
             _progress(5, "Downloading...")
-            p = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                encoding="utf-8",
-                errors="ignore",
-            )
+            p = spawn_streaming(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             downloaded_files = []
             if p.stdout:
                 for line in p.stdout:
@@ -440,8 +440,11 @@ class App(tk.Tk):
         except Exception:
             pass
 
-        self.geometry("1000x780")
-        self.minsize(800, 600)
+        w, h = 840, 1020
+        x = (self.winfo_screenwidth() - w) // 2
+        y = (self.winfo_screenheight() - h) // 2
+        self.geometry(f"{w}x{h}+{x}+{y}")
+        self.minsize(w, h)
 
         # Help menu (right-aligned bar) + F1
         try:
@@ -523,11 +526,18 @@ class App(tk.Tk):
 
             except Exception:
                 pass
+
+        try:
+            self.after_idle(self.refresh_i18n_ui)
+        except Exception:
+            pass
+
         # Enforce minimum window size (height)
         try:
             self.update_idletasks()
-            w = self.winfo_width() or self.winfo_reqwidth() or 960
-            self.minsize(w, 1020)
+            w = 840
+            h = 1020
+            self.minsize(w, h)
         except Exception:
             pass
         self._cookies_loaded_once = False
@@ -925,6 +935,22 @@ class App(tk.Tk):
 
         # ---------- small UI helpers ---------- ----------
 
+    def refresh_i18n_ui(self) -> None:
+        """
+        Re-apply the current language to all UI elements WITHOUT persisting config.
+        Useful right after the window is realized to get rid of any fallback labels.
+        """
+        try:
+            # Reuse the same path as language switching, but don't write config
+            self.change_language(self.current_language, persist=False)
+        except Exception:
+            # As a fallback, at least rebuild the visible parts with current lang
+            try:
+                self._rebuild_help_bar()
+                self._rebuild_main_ui()
+            except Exception:
+                pass
+
     def _attach_context_menu(self, widget, kind: str = "entry") -> None:
         menu = tk.Menu(widget, tearoff=0)
 
@@ -1171,12 +1197,28 @@ class App(tk.Tk):
             pass
         self.destroy()
 
-        # ---------- run / cancel ----------
+    # ---------- run / cancel ----------
 
     def _cancel(self) -> None:
-        CANCEL_EVENT.set()
-        self.log("Cancel requested; terminating subprocesses...")
+        """User pressed Cancel: signal workers and terminate any registered children."""
+        # Use the shared CANCEL_EVENT (imported from workbench_core)
+        if not CANCEL_EVENT.is_set():
+            CANCEL_EVENT.set()
+            try:
+                self.log("Cancel requested — terminating active processes…")
+            except Exception:
+                pass
+
+        # Stop anything spawned via core helpers (yt-dlp, ffmpeg, mp3gain, etc.)
         terminate_all_procs()
+
+        # Optional UI feedback
+        try:
+            self.progress_var.set(0)  # if you have a progress var
+            self.status_var.set("Cancelling…")
+            self.cancel_btn.configure(state="disabled")  # avoid double-cancel clicks
+        except Exception:
+            pass
 
     def _run(self) -> None:
         CANCEL_EVENT.clear()
@@ -1291,6 +1333,7 @@ class App(tk.Tk):
             return
         try:
             data = json.loads(p.read_text(encoding="utf-8", errors="ignore"))
+            self.config = data
 
             # Apply language and tooltip settings early
             try:

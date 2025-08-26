@@ -24,10 +24,27 @@ import re
 import shutil
 import os
 import random
+import signal
 import sys
 import subprocess
 import threading
+import time
 import http.cookiejar as _cj
+
+# Global registry of running child processes
+_CURRENT_PROCS_LOCK = threading.RLock()
+_CURRENT_PROCS: set[subprocess.Popen] = set()
+
+
+def _register_proc(p: subprocess.Popen) -> None:
+    with _CURRENT_PROCS_LOCK:
+        _CURRENT_PROCS.add(p)
+
+
+def _unregister_proc(p: subprocess.Popen) -> None:
+    with _CURRENT_PROCS_LOCK:
+        _CURRENT_PROCS.discard(p)
+
 
 # -----------------------
 # Import/install helpers
@@ -74,56 +91,155 @@ CURRENT_PROCS_LOCK = threading.Lock()
 CANCEL_EVENT = threading.Event()
 
 
-def _register_proc(p: subprocess.Popen) -> None:
-    with CURRENT_PROCS_LOCK:
-        CURRENT_PROCS.append(p)
+def _spawn_process(cmd: list[str], **kwargs) -> subprocess.Popen:
+    """
+    Start a child in its own process group to support cross-platform cancellation.
+    Always pass an argv list (no shell).
+    """
+    # Text mode defaults
+    kwargs.setdefault("stdin", subprocess.PIPE)
+    kwargs.setdefault("stdout", subprocess.PIPE)
+    kwargs.setdefault("stderr", subprocess.PIPE)
+    kwargs.setdefault("text", True)
+
+    if os.name == "nt":
+        # New process group so we can send CTRL_BREAK_EVENT
+        CREATE_NEW_PROCESS_GROUP = 0x00000200
+        kwargs["creationflags"] = kwargs.get("creationflags", 0) | CREATE_NEW_PROCESS_GROUP
+    else:
+        # New group; SIGTERM/SIGKILL can be sent to the whole tree
+        kwargs.setdefault("preexec_fn", os.setsid)
+
+    p = subprocess.Popen(cmd, **kwargs)  # nosec: trusted argv list
+    _register_proc(p)
+    return p
 
 
-def _unregister_proc(p: subprocess.Popen) -> None:
-    with CURRENT_PROCS_LOCK:
+def spawn_streaming(cmd: list[str], **kwargs) -> subprocess.Popen:
+    """
+    Start a long-running command whose stdout/stderr you will read incrementally.
+    Use this for yt-dlp streaming in the GUI.
+    """
+    p = _spawn_process(cmd, **kwargs)
+    return p
+
+
+def finalize_process(p: subprocess.Popen) -> None:
+    """Remove a child from the registry after it exits (GUI streaming case)."""
+    _unregister_proc(p)
+
+
+def terminate_all_procs(timeout: float = 3.0) -> None:
+    """
+    Try graceful shutdown of all registered children, then escalate.
+    Safe to call multiple times.
+    """
+    with _CURRENT_PROCS_LOCK:
+        procs = list(_CURRENT_PROCS)
+
+    # 1) Graceful
+    for p in procs:
         try:
-            CURRENT_PROCS.remove(p)
-        except ValueError:
-            pass
+            if p.poll() is not None:
+                continue
+            if os.name == "nt":
+                p.send_signal(signal.CTRL_BREAK_EVENT)
+            else:
+                # signal whole group
+                os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+        except Exception:
+            try:
+                p.terminate()
+            except Exception:
+                pass
 
-
-def terminate_all_procs() -> None:
-    with CURRENT_PROCS_LOCK:
-        to_kill = list(CURRENT_PROCS)
-    for p in to_kill:
+    # 2) Wait a bit
+    deadline = time.time() + max(0.1, timeout)
+    for p in procs:
         try:
-            p.terminate()
+            if p.poll() is None:
+                remaining = deadline - time.time()
+                if remaining > 0:
+                    p.wait(remaining)
         except Exception:
             pass
+
+    # 3) Hard kill leftovers
+    for p in procs:
+        try:
+            if p.poll() is None:
+                if os.name == "nt":
+                    p.kill()
+                else:
+                    os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+        except Exception:
+            pass
+
+    # Cleanup registry
+    for p in procs:
+        _unregister_proc(p)
+
+
+def _last_lines(s: str, n: int = 12) -> str:
+    try:
+        return "\n".join(s.splitlines()[-n:])
+    except Exception:
+        return s
+
+
+def _run_capture(
+    cmd: list[str], *, timeout: float | None = None, check: bool = True, cwd: str | None = None
+) -> tuple[int, str, str]:
+    """
+    Run a command to completion, capturing stdout/stderr with optional timeout.
+    Raises CalledProcessError when check=True and rc != 0 (with stderr tail).
+    """
+    p = _spawn_process(cmd, cwd=cwd)
+    try:
+        out, err = p.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        # escalate on timeout
+        try:
+            if os.name == "nt":
+                p.send_signal(signal.CTRL_BREAK_EVENT)
+            else:
+                os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+        except Exception:
+            pass
+        finally:
+            try:
+                out, err = p.communicate(timeout=1.0)
+            except Exception:
+                out, err = "", ""
+        rc = p.poll() if p.poll() is not None else -9
+    else:
+        rc = p.returncode
+    finally:
+        _unregister_proc(p)
+
+    if check and rc != 0:
+        tail = _last_lines(err)
+        raise subprocess.CalledProcessError(rc, cmd, output=out, stderr=tail)
+    return rc, out, err
+
+
+def run_quiet(
+    cmd: list[str], *, timeout: float | None = None, cwd: str | None = None
+) -> tuple[int, str]:
+    """
+    Run and return (rc, stderr_tail). Keeps last lines of stderr for diagnostics.
+    """
+    try:
+        rc, _out, err = _run_capture(cmd, timeout=timeout, check=False, cwd=cwd)
+    except subprocess.CalledProcessError as e:
+        # shouldn't happen because check=False above, but just in case
+        return e.returncode, _last_lines(e.stderr or "")
+    return rc, _last_lines(err or "")
 
 
 # -----------------------
 # Subprocess helpers
 # -----------------------
-
-
-def _run_capture(
-    cmd: list[str],
-    cwd: Path | None = None,
-    env: dict[str, str] | None = None,
-    text: bool = True,
-) -> tuple[int, str, str]:
-    """Run a command; return (rc, stdout, stderr). Tests monkeypatch this."""
-    p = subprocess.Popen(
-        cmd,
-        cwd=str(cwd) if cwd else None,
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=text,
-    )
-    _register_proc(p)
-    try:
-        out, err = p.communicate()
-        rc = p.returncode or 0
-        return rc, out or "", err or ""
-    finally:
-        _unregister_proc(p)
 
 
 def run_capture(
@@ -137,27 +253,6 @@ def run_capture(
     if rc != 0:
         raise RuntimeError(f"{cmd[0]} exited with {rc}: {(err or out).strip()}")
     return out
-
-
-def run_quiet(
-    cmd: list[str],
-    cwd: Path | None = None,
-    env: dict[str, str] | None = None,
-) -> int:
-    """Run without capturing output; return rc."""
-    p = subprocess.Popen(
-        cmd,
-        cwd=str(cwd) if cwd else None,
-        env=env,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    _register_proc(p)
-    try:
-        p.wait()
-        return p.returncode or 0
-    finally:
-        _unregister_proc(p)
 
 
 # -----------------------
