@@ -1,0 +1,21 @@
+name: i18n Key Drift
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  i18n:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run i18n drift check
+        run: python scripts/check_i18n_keys.py

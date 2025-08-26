@@ -54,3 +54,15 @@ check-deps:
 	@if command -v ffmpeg >/dev/null 2>&1; then echo "✅ ffmpeg: $$(command -v ffmpeg)"; else echo "❌ ffmpeg NOT found"; fi
 	@if command -v ffprobe >/dev/null 2>&1; then echo "✅ ffprobe: $$(command -v ffprobe)"; else echo "❌ ffprobe NOT found"; fi
 	@if command -v mp3gain >/dev/null 2>&1; then echo "✅ mp3gain: $$(command -v mp3gain)"; else echo "❌ mp3gain NOT found"; fi
+
+# ---- i18n key drift check ----
+.PHONY: check-i18n validate ci
+
+check-i18n:
+	python scripts/check_i18n_keys.py
+
+# Run everything you'd want in CI locally
+validate: lint test check-i18n
+
+# Short alias for CI systems
+ci: validate

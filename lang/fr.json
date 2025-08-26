@@ -1,160 +1,171 @@
 {
-  "meta": {
-    "name": "Français",
-    "code": "fr"
-  },
   "app_title": "YT Audio Workbench",
-  "frames": {
-    "url": "URL",
-    "output": "Sortie",
-    "options": "Options",
-    "joining": "Assemblage",
-    "cookies": "Cookies",
-    "controls": "Commandes",
-    "log": "Journal"
-  },
-  "labels": {
-    "url": "URL de la playlist ou de la vidéo :",
-    "output_folder": "Dossier de sortie :",
-    "sample_rate": "Fréquence d’échantillonnage :",
-    "bitrate": "Débit (kb/s) :",
-    "delay_between_items": "Délai entre les éléments (s) :",
-    "playlist_format": "Format de playlist :",
-    "join_name": "Nom :",
-    "cookies_file": "Fichier cookies.txt :",
-    "cookies_browser": "Navigateur :"
+  "buttons": {
+    "browse": "Parcourir…",
+    "cancel": "Annuler",
+    "check_install_deps": "Vérifier/installer les dépendances",
+    "convert_cookies": "Convertir JSON → cookies.txt",
+    "open_help": "Ouvrir l’aide",
+    "open_log": "Ouvrir le journal",
+    "open_output": "Ouvrir le dossier",
+    "run": "Lancer",
+    "verify_tools": "Vérifier les outils"
   },
   "checkboxes": {
-    "use_run_subdir": "Utiliser un sous-dossier par exécution (recommandé)",
     "add_numbering": "Ajouter une numérotation",
-    "fallback_numbering": "Numérotation de secours",
-    "sanitize_filenames": "Nettoyer les noms de fichiers (compatibilité maximale)",
-    "embed_metadata": "Intégrer les métadonnées",
-    "write_cue": "Écrire un fichier CUE",
-    "embed_chapters": "Intégrer les chapitres",
-    "vlc_segments": "Playlist de segments VLC",
-    "random_join": "Aléatoiriser l’ordre d’assemblage",
-    "include_id": "Inclure l’ID vidéo dans le nom",
     "archive": "Maintenir un journal des téléchargements (ignorer l’existant)",
+    "dedup_artist": "Supprimer le doublon d’artiste dans le nom de fichier",
+    "embed_chapters": "Intégrer les chapitres",
+    "embed_metadata": "Intégrer les métadonnées",
+    "fallback_numbering": "Numérotation de secours",
+    "include_id": "Inclure l’ID vidéo dans le nom",
+    "join_into_one": "Assembler en un seul MP3",
+    "keep_temp_wavs": "Conserver les WAV temporaires",
+    "random_join": "Aléatoiriser l’ordre d’assemblage",
+    "sanitize_filenames": "Nettoyer les noms de fichiers (compatibilité maximale)",
+    "use_archive": "Maintenir un journal des téléchargements (ignorer l’existant)",
+    "use_run_subdir": "Utiliser un sous-dossier par exécution (recommandé)",
     "validate_sr": "Valider la fréquence d’échant.",
     "verbose_logging": "Journalisation détaillée de yt-dlp",
-    "use_archive": "Maintenir un journal des téléchargements (ignorer l’existant)",
-    "verbose_ydl": "Journalisation détaillée de yt-dlp"
-  },
-  "buttons": {
-    "run": "Lancer",
-    "cancel": "Annuler",
-    "browse": "Parcourir…",
-    "verify_tools": "Vérifier les outils",
-    "check_install_deps": "Vérifier/installer les dépendances",
-    "open_output": "Ouvrir le dossier",
-    "open_log": "Ouvrir le journal",
-    "open_help": "Ouvrir l’aide",
-    "convert_cookies": "Convertir JSON → cookies.txt"
+    "verbose_ydl": "Journalisation détaillée de yt-dlp",
+    "vlc_segments": "Playlist de segments VLC",
+    "write_cue": "Écrire un fichier CUE"
   },
   "combos": {
     "cookies_browser": {
-      "none": "Aucun",
+      "brave": "Brave",
       "chrome": "Chrome",
       "edge": "Edge",
       "firefox": "Firefox",
-      "brave": "Brave"
+      "none": "Aucun"
     },
     "playlist_format": {
-      "M3U8": "M3U8",
       "M3U": "M3U",
+      "M3U8": "M3U8",
       "PLS": "PLS"
     }
   },
-  "tooltips": {
-    "url_entry": "Collez l’URL complète d’une vidéo ou d’une playlist YouTube ici. Clic droit pour le menu contextuel.",
-    "output_folder_entry": "Sélectionnez le dossier principal où seront enregistrés les fichiers, journaux et sous-dossiers.",
-    "use_run_subdir": "Crée un sous-dossier daté pour chaque exécution afin de garder les fichiers organisés.",
-    "add_numbering": "Ajoute 001‑, 002‑, … au début des pistes, dans l’ordre de la playlist.",
-    "fallback_numbering": "Si l’ordre de la playlist est incertain, utilise une numérotation simple.",
-    "sanitize_filenames_checkbox": "Recommandé. Supprime les caractères spéciaux pour une compatibilité maximale avec tous les lecteurs.",
-    "embed_metadata": "Écrit les balises ID3 (titre, artiste, album, pochette si disponible).",
-    "write_cue": "Génère un fichier .cue correspondant au fichier assemblé.",
-    "embed_chapters": "Ajoute des chapitres ID3 pour naviguer dans un fichier assemblé.",
-    "vlc_segments": "Crée une playlist de segments lisible par VLC au lieu d’un fichier unique.",
-    "random_join": "Mélange l’ordre des pistes lors de l’assemblage.",
-    "join_name_entry": "Nom du fichier final lors de l’option « Assemblage ».",
-    "cookies_file_entry": "Sélectionnez un cookies.txt (format Netscape) ou convertissez un JSON de navigateur.",
-    "cookies_browser_combo": "Choisissez un navigateur pour utiliser automatiquement ses cookies.",
-    "verify_tools_button": "Vérifie la présence de ffmpeg, yt-dlp, mp3gain (facultatif), etc.",
-    "run_button": "Démarre le téléchargement et le traitement.",
-    "cancel_button": "Interrompt la tâche en cours ; des fichiers partiels peuvent rester.",
-    "sample_rate_combo": "Impose une fréquence d’échantillonnage audio cohérente. 44100 Hz est la norme qualité CD.",
-    "bitrate_combo": "Définit la qualité du fichier MP3. 192 est une bonne qualité, 320 est la plus élevée.",
-    "delay_spinbox": "Fait une pause entre les téléchargements d’une playlist pour éviter les limites de débit.",
-    "playlist_format_combo": "Crée un fichier playlist pour toutes les pistes téléchargées.",
-    "check_deps_button": "Tente d’installer automatiquement les dépendances manquantes (p. ex. via winget sur Windows).",
-    "checkboxes": {
-      "join_into_one": "Active la combinaison de tous les éléments en un seul MP3 (style album).",
-      "use_run_subdir": "Crée un sous-dossier daté pour chaque exécution afin de garder les fichiers organisés.",
-      "add_numbering": "Ajoute 001‑, 002‑, … au début des pistes, dans l’ordre de la playlist.",
-      "fallback_numbering": "Si l’ordre de la playlist est incertain, utilise une numérotation simple.",
-      "include_id": "Inclure l’ID vidéo dans le nom",
-      "sanitize_filenames": "Nettoyer les noms de fichiers (compatibilité maximale)",
-      "embed_metadata": "Écrit les balises ID3 (titre, artiste, album, pochette si disponible).",
-      "write_cue": "Génère un fichier .cue correspondant au fichier assemblé.",
-      "embed_chapters": "Ajoute des chapitres ID3 pour naviguer dans un fichier assemblé.",
-      "vlc_segments": "Crée une playlist de segments lisible par VLC au lieu d’un fichier unique.",
-      "randomize_order": "Randomize order before joining into a single MP3.",
-      "keep_temp_wavs": "Keep intermediate WAV files (useful for debugging).",
-      "dedup_artist": "If the artist name repeats at both ends of the filename, keep only one.",
-      "use_archive": "Use yt-dlp's download archive to skip already-processed items.",
-      "mp3gain_normalize": "Analyze and normalize loudness using MP3Gain (writes APEv2 tags).",
-      "validate_sr": "Valider la fréquence d’échant.",
-      "verbose_ydl": "Enable verbose yt-dlp logging to help troubleshoot downloads."
-    },
-    "paste_button": "Colle le contenu du presse‑papiers dans ce champ.",
-    "browse_output_button": "Ouvre un sélecteur de dossier pour le répertoire de sortie.",
-    "browse_cookies_button": "Ouvre un sélecteur de fichier pour choisir un fichier de cookies.",
-    "open_log_button": "Ouvre le dernier fichier journal dans votre éditeur par défaut.",
-    "copy_log_button": "Copie le texte du journal visible dans le presse‑papiers."
-  },
-  "messages": {
-    "idle": "Au repos",
-    "running": "En cours d’exécution…",
-    "verifying_tools": "Vérification des outils…",
-    "cancelled": "Annulé",
-    "completed": "Terminé",
-    "error": "Erreur",
-    "preparing": "Préparation…",
-    "downloading": "Téléchargement…",
-    "joining": "Assemblage…",
-    "normalizing": "Normalisation (mp3gain)…",
-    "saving_log": "Enregistrement du journal…"
-  },
-  "menu": {
-    "help": "Aide",
-    "open_help": "Ouvrir l’aide",
-    "copy_diagnostics": "Copier les informations de diagnostic",
-    "about": "À propos",
-    "language": "Langue"
-  },
   "dialog": {
     "about": {
-      "title": "À propos",
-      "version": "Version : {version}",
+      "close": "Fermer",
       "copy_diagnostics": "Copier les informations de diagnostic",
       "open_troubleshooting": "Ouvrir Aide → Dépannage",
-      "close": "Fermer"
-    },
-    "help": {
-      "title": "Aide — {app}",
-      "search": "Rechercher :",
-      "not_found": "Fichier d’aide introuvable."
+      "title": "À propos",
+      "version": "Version : {version}"
     },
     "copied": {
-      "title": "Diagnostics copiés",
-      "body": "Informations de diagnostic copiées dans le presse‑papiers."
+      "body": "Informations de diagnostic copiées dans le presse‑papiers.",
+      "title": "Diagnostics copiés"
+    },
+    "help": {
+      "not_found": "Fichier d’aide introuvable.",
+      "search": "Rechercher :",
+      "title": "Aide — {app}"
     }
+  },
+  "frames": {
+    "controls": "Commandes",
+    "cookies": "Cookies",
+    "download_formatting": "Téléchargement & formatage",
+    "filename_options": "Nom de fichier & options",
+    "joining": "Assemblage",
+    "log": "Journal",
+    "options": "Options",
+    "output": "Sortie",
+    "system_deps": "Dépendances système",
+    "url": "URL"
   },
   "help": {
     "about_title": "À propos",
-    "diag_copied_title": "Diagnostics",
-    "diag_copied_msg": "Informations de diagnostic copiées dans le presse‑papiers."
+    "diag_copied_msg": "Informations de diagnostic copiées dans le presse‑papiers.",
+    "diag_copied_title": "Diagnostics"
+  },
+  "labels": {
+    "bitrate": "Débit (kb/s) :",
+    "cookies_browser": "Navigateur :",
+    "cookies_file": "Fichier cookies.txt :",
+    "delay_between_items": "Délai entre les éléments (s) :",
+    "join_name": "Nom :",
+    "output_folder": "Dossier de sortie :",
+    "playlist_format": "Format de playlist :",
+    "sample_rate": "Fréquence d’échantillonnage :",
+    "url": "URL de la playlist ou de la vidéo :"
+  },
+  "menu": {
+    "about": "À propos",
+    "copy_diagnostics": "Copier les informations de diagnostic",
+    "help": "Aide",
+    "language": "Langue",
+    "open_help": "Ouvrir l’aide",
+    "tooltips": "Infobulles",
+    "tooltips.delay": "Délai des infobulles (ms)",
+    "tooltips.wrap": "Retour à la ligne des infobulles"
+  },
+  "messages": {
+    "cancelled": "Annulé",
+    "completed": "Terminé",
+    "downloading": "Téléchargement…",
+    "error": "Erreur",
+    "idle": "Au repos",
+    "joining": "Assemblage…",
+    "normalizing": "Normalisation (mp3gain)…",
+    "preparing": "Préparation…",
+    "running": "En cours d’exécution…",
+    "saving_log": "Enregistrement du journal…",
+    "verifying_tools": "Vérification des outils…"
+  },
+  "meta": {
+    "code": "fr",
+    "name": "Français"
+  },
+  "tooltips": {
+    "add_numbering": "Ajoute 001‑, 002‑, … au début des pistes, dans l’ordre de la playlist.",
+    "bitrate_combo": "Définit la qualité du fichier MP3. 192 est une bonne qualité, 320 est la plus élevée.",
+    "browse_cookies_button": "Ouvre un sélecteur de fichier pour choisir un fichier de cookies.",
+    "browse_output_button": "Ouvre un sélecteur de dossier pour le répertoire de sortie.",
+    "cancel_button": "Interrompt la tâche en cours ; des fichiers partiels peuvent rester.",
+    "check_deps_button": "Tente d’installer automatiquement les dépendances manquantes (p. ex. via winget sur Windows).",
+    "checkboxes": {
+      "add_numbering": "Ajoute 001‑, 002‑, … au début des pistes, dans l’ordre de la playlist.",
+      "dedup_artist": "Si le nom de l’artiste se répète aux deux extrémités du nom de fichier, n’en garder qu’un.",
+      "embed_chapters": "Ajoute des chapitres ID3 pour naviguer dans un fichier assemblé.",
+      "embed_metadata": "Écrit les balises ID3 (titre, artiste, album, pochette si disponible).",
+      "fallback_numbering": "Si l’ordre de la playlist est incertain, utilise une numérotation simple.",
+      "include_id": "Inclure l’ID vidéo dans le nom",
+      "join_into_one": "Active la combinaison de tous les éléments en un seul MP3 (style album).",
+      "keep_temp_wavs": "Conserver les fichiers WAV intermédiaires (utile pour le débogage).",
+      "mp3gain_normalize": "Analyser et normaliser le volume avec MP3Gain (écrit des balises APEv2).",
+      "randomize_order": "Randomiser l’ordre avant l’assemblage en un seul MP3.",
+      "sanitize_filenames": "Nettoyer les noms de fichiers (compatibilité maximale)",
+      "use_archive": "Utiliser l’archive de téléchargement de yt-dlp pour ignorer les éléments déjà traités.",
+      "use_run_subdir": "Crée un sous-dossier daté pour chaque exécution afin de garder les fichiers organisés.",
+      "validate_sr": "Valider la fréquence d’échant.",
+      "verbose_ydl": "Activer les journaux détaillés de yt-dlp pour faciliter le diagnostic des téléchargements.",
+      "vlc_segments": "Crée une playlist de segments lisible par VLC au lieu d’un fichier unique.",
+      "write_cue": "Génère un fichier .cue correspondant au fichier assemblé."
+    },
+    "cookies_browser": "Choisir le navigateur dont extraire les cookies",
+    "cookies_browser_combo": "Choisissez un navigateur pour utiliser automatiquement ses cookies.",
+    "cookies_file_entry": "Sélectionnez un cookies.txt (format Netscape) ou convertissez un JSON de navigateur.",
+    "copy_log_button": "Copie le texte du journal visible dans le presse‑papiers.",
+    "delay_spinbox": "Fait une pause entre les téléchargements d’une playlist pour éviter les limites de débit.",
+    "embed_chapters": "Ajoute des chapitres ID3 pour naviguer dans un fichier assemblé.",
+    "embed_metadata": "Écrit les balises ID3 (titre, artiste, album, pochette si disponible).",
+    "fallback_numbering": "Si l’ordre de la playlist est incertain, utilise une numérotation simple.",
+    "install_deps_button": "Ouvrir le guide d’installation (FFmpeg, MP3Gain, etc.)",
+    "join_name_entry": "Nom du fichier final lors de l’option « Assemblage ».",
+    "open_log_button": "Ouvre le dernier fichier journal dans votre éditeur par défaut.",
+    "output_folder_entry": "Sélectionnez le dossier principal où seront enregistrés les fichiers, journaux et sous-dossiers.",
+    "paste_button": "Colle le contenu du presse‑papiers dans ce champ.",
+    "playlist_format_combo": "Crée un fichier playlist pour toutes les pistes téléchargées.",
+    "random_join": "Mélange l’ordre des pistes lors de l’assemblage.",
+    "run_button": "Démarre le téléchargement et le traitement.",
+    "sample_rate_combo": "Impose une fréquence d’échantillonnage audio cohérente. 44100 Hz est la norme qualité CD.",
+    "sanitize_filenames_checkbox": "Recommandé. Supprime les caractères spéciaux pour une compatibilité maximale avec tous les lecteurs.",
+    "url_entry": "Collez l’URL complète d’une vidéo ou d’une playlist YouTube ici. Clic droit pour le menu contextuel.",
+    "use_run_subdir": "Crée un sous-dossier daté pour chaque exécution afin de garder les fichiers organisés.",
+    "verify_tools_button": "Vérifie la présence de ffmpeg, yt-dlp, mp3gain (facultatif), etc.",
+    "vlc_segments": "Crée une playlist de segments lisible par VLC au lieu d’un fichier unique.",
+    "write_cue": "Génère un fichier .cue correspondant au fichier assemblé."
   }
 }

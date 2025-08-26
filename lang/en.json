@@ -1,126 +1,171 @@
 {
   "app_title": "YT Audio Workbench",
-  "menu": {
-    "help": "Help",
+  "buttons": {
+    "browse": "Browse…",
+    "cancel": "Cancel",
+    "check_install_deps": "Check & Install System Deps",
+    "convert_cookies": "Convert Cookies",
     "open_help": "Open Help",
-    "copy_diagnostics": "Copy diagnostic info",
-    "about": "About",
-    "language": "Language",
-    "tooltips": "Tooltips",
-    "tooltips.delay": "Tooltip delay",
-    "tooltips.wrap": "Tooltip wrap"
+    "open_log": "View Log File",
+    "open_output": "Open Output",
+    "run": "Run",
+    "verify_tools": "Verify Tools"
   },
-  "meta": {
-    "name": "English"
+  "checkboxes": {
+    "add_numbering": "Add numbering",
+    "archive": "Archive",
+    "dedup_artist": "De-duplicate artist in filename",
+    "embed_chapters": "Embed ID3 chapters in joined file",
+    "embed_metadata": "Embed metadata",
+    "fallback_numbering": "Fallback numbering when not a playlist",
+    "include_id": "Include YouTube ID in filename",
+    "join_into_one": "Join into one MP3",
+    "keep_temp_wavs": "Keep temp WAVs",
+    "random_join": "Randomize order when joining",
+    "sanitize_filenames": "Sanitize filenames (max compatibility)",
+    "use_archive": "Use Archive",
+    "use_run_subdir": "Use per-run subfolder (recommended)",
+    "validate_sr": "Validate Sr",
+    "verbose_logging": "Verbose Logging",
+    "verbose_ydl": "Verbose yt-dlp",
+    "vlc_segments": "Write VLC segment playlist for joined file (M3U with EXTVLCOPT)",
+    "write_cue": "Write CUE for joined file"
   },
-  "messages": {
-    "idle": "Idle"
+  "combos": {
+    "cookies_browser": {
+      "brave": "Brave",
+      "chrome": "Chrome",
+      "edge": "Edge",
+      "firefox": "Firefox",
+      "none": "None"
+    },
+    "playlist_format": {
+      "M3U": "M3U",
+      "M3U8": "M3U8",
+      "PLS": "PLS"
+    }
+  },
+  "dialog": {
+    "about": {
+      "close": "Close",
+      "copy_diagnostics": "Copy diagnostic info",
+      "open_troubleshooting": "Open Help → Troubleshooting",
+      "title": "About",
+      "version": "Version: {version}"
+    },
+    "copied": {
+      "body": "Diagnostic info copied to clipboard.",
+      "title": "Diagnostics copied"
+    },
+    "help": {
+      "not_found": "Help file not found.",
+      "search": "Search:",
+      "title": "Help — {app}"
+    }
   },
   "frames": {
-    "url": "URL",
-    "output": "Output",
+    "controls": "Controls",
     "cookies": "Cookies",
     "download_formatting": "Download & Formatting",
     "filename_options": "Filename & Options",
     "joining": "Joining",
+    "log": "Log",
+    "options": "Options",
+    "output": "Output",
     "system_deps": "System Dependencies",
-    "log": "Log"
-  },
-  "labels": {
-    "url": "Playlist or video URL:",
-    "sample_rate": "Sample rate:",
-    "bitrate": "Bitrate (kbps):",
-    "delay_between_items": "Delay between items (s):",
-    "playlist_format": "Playlist format:",
-    "cookies_file": "Cookies file (.txt or JSON)",
-    "cookies_browser": "Use browser cookies:",
-    "output_folder": "Output folder:"
-  },
-  "buttons": {
-    "run": "Run",
-    "cancel": "Cancel",
-    "browse": "Browse…",
-    "verify_tools": "Verify Tools",
-    "open_log": "View Log File",
-    "check_install_deps": "Check & Install System Deps"
-  },
-  "checkboxes": {
-    "add_numbering": "Add numbering",
-    "fallback_numbering": "Fallback numbering when not a playlist",
-    "include_id": "Include YouTube ID in filename",
-    "dedup_artist": "De-duplicate artist in filename",
-    "sanitize_filenames": "Sanitize filenames (max compatibility)",
-    "embed_metadata": "Embed metadata",
-    "write_cue": "Write CUE for joined file",
-    "embed_chapters": "Embed ID3 chapters in joined file",
-    "vlc_segments": "Write VLC segment playlist for joined file (M3U with EXTVLCOPT)",
-    "random_join": "Randomize order when joining",
-    "keep_temp_wavs": "Keep temp WAVs",
-    "join_into_one": "Join into one MP3",
-    "use_run_subdir": "Use per-run subfolder (recommended)"
-  },
-  "tooltips": {
-    "url_entry": "Paste the full URL of a YouTube video or playlist here. Right-click for context menu.",
-    "output_folder_entry": "Select the main folder where files, logs, and subfolders will be saved.",
-    "cookies_file_entry": "A cookies.txt (Netscape format) or Cookie-Editor JSON file.",
-    "cookies_browser": "Use cookies from a supported browser (Chrome/Edge/Firefox).",
-    "use_run_subdir": "Creates a timestamped subfolder for this run to keep files organized.",
-    "run_button": "Start the processing pipeline.",
-    "cancel_button": "Cancel the current run.",
-    "join_name_entry": "Name for the final joined MP3 / album.",
-    "checkboxes": {
-      "use_run_subdir": "Creates a timestamped subfolder for this run to keep files organized.",
-      "add_numbering": "Prefix track numbers to filenames using playlist order (or autonumber).",
-      "fallback_numbering": "If playlist index missing, use autonumber to keep a consistent order.",
-      "include_id": "Appends the YouTube video ID to the filename for uniqueness.",
-      "sanitize_filenames": "Removes problematic characters to maximize compatibility.",
-      "embed_metadata": "Write ID3 metadata tags into the MP3 files.",
-      "write_cue": "Write a CUE sheet for the joined album.",
-      "embed_chapters": "Embed chapter markers into the MP3 (when available).",
-      "vlc_segments": "Create a VLC playlist that jumps to each segment/track.",
-      "randomize_order": "Randomize order before joining into a single MP3.",
-      "keep_temp_wavs": "Keep intermediate WAV files (useful for debugging).",
-      "dedup_artist": "If the artist name repeats at both ends of the filename, keep only one.",
-      "use_archive": "Use yt-dlp's download archive to skip already-processed items.",
-      "mp3gain_normalize": "Analyze and normalize loudness using MP3Gain (writes APEv2 tags).",
-      "validate_sr": "Validate produced files with ffprobe (duration/sample rate sanity checks).",
-      "verbose_ydl": "Enable verbose yt-dlp logging to help troubleshoot downloads.",
-      "join_into_one": "Enable to combine all selected/queued items into a single MP3 (album-style)."
-    },
-    "verify_tools_button": "Verify external tools are installed and on PATH.",
-    "install_deps_button": "Attempt to install missing dependencies (Windows/macOS/Linux).",
-    "sample_rate_combo": "Enforces a consistent audio sample rate. 44100 Hz is standard for CD quality.",
-    "bitrate_combo": "Sets the quality of the MP3 file. 192 is good quality, 320 is highest.",
-    "delay_spinbox": "Pauses between downloads in a playlist to avoid being rate-limited.",
-    "playlist_format_combo": "Creates a playlist file for all downloaded tracks.",
-    "check_deps_button": "Attempts to automatically install missing dependencies (e.g., using winget on Windows).",
-    "paste_button": "Paste the clipboard contents into this field.",
-    "browse_output_button": "Open a folder picker for the output directory.",
-    "browse_cookies_button": "Open a file picker to select a cookies file.",
-    "open_log_button": "Open the latest log file in your default editor.",
-    "copy_log_button": "Copy the visible log text to the clipboard."
-  },
-  "dialog": {
-    "about": {
-      "title": "About",
-      "version": "Version: {version}",
-      "copy_diagnostics": "Copy diagnostic info",
-      "open_troubleshooting": "Open Help → Troubleshooting",
-      "close": "Close"
-    },
-    "help": {
-      "title": "Help — {app}",
-      "search": "Search:",
-      "not_found": "Help file not found."
-    },
-    "copied": {
-      "title": "Diagnostics copied",
-      "body": "Diagnostic info copied to clipboard."
-    }
+    "url": "URL"
   },
   "help": {
     "about_title": "About",
-    "diag_copied_title": "Diagnostics",
-    "diag_copied_msg": "Diagnostic info copied to clipboard."
+    "diag_copied_msg": "Diagnostic info copied to clipboard.",
+    "diag_copied_title": "Diagnostics"
+  },
+  "labels": {
+    "bitrate": "Bitrate (kbps):",
+    "cookies_browser": "Use browser cookies:",
+    "cookies_file": "Cookies file (.txt or JSON)",
+    "delay_between_items": "Delay between items (s):",
+    "join_name": "Join Name",
+    "output_folder": "Output folder:",
+    "playlist_format": "Playlist format:",
+    "sample_rate": "Sample rate:",
+    "url": "Playlist or video URL:"
+  },
+  "menu": {
+    "about": "About",
+    "copy_diagnostics": "Copy diagnostic info",
+    "help": "Help",
+    "language": "Language",
+    "open_help": "Open Help",
+    "tooltips": "Tooltips",
+    "tooltips.delay": "Tooltip delay",
+    "tooltips.wrap": "Tooltip wrap"
+  },
+  "messages": {
+    "cancelled": "Cancelled",
+    "completed": "Completed",
+    "downloading": "Downloading",
+    "error": "Error",
+    "idle": "Idle",
+    "joining": "Joining",
+    "normalizing": "Normalizing",
+    "preparing": "Preparing",
+    "running": "Running",
+    "saving_log": "Saving Log",
+    "verifying_tools": "Verifying Tools"
+  },
+  "meta": {
+    "code": "Code",
+    "name": "English"
+  },
+  "tooltips": {
+    "add_numbering": "Add Numbering",
+    "bitrate_combo": "Sets the quality of the MP3 file. 192 is good quality, 320 is highest.",
+    "browse_cookies_button": "Open a file picker to select a cookies file.",
+    "browse_output_button": "Open a folder picker for the output directory.",
+    "cancel_button": "Cancel the current run.",
+    "check_deps_button": "Attempts to automatically install missing dependencies (e.g., using winget on Windows).",
+    "checkboxes": {
+      "add_numbering": "Prefix track numbers to filenames using playlist order (or autonumber).",
+      "dedup_artist": "If the artist name repeats at both ends of the filename, keep only one.",
+      "embed_chapters": "Embed chapter markers into the MP3 (when available).",
+      "embed_metadata": "Write ID3 metadata tags into the MP3 files.",
+      "fallback_numbering": "If playlist index missing, use autonumber to keep a consistent order.",
+      "include_id": "Appends the YouTube video ID to the filename for uniqueness.",
+      "join_into_one": "Enable to combine all selected/queued items into a single MP3 (album-style).",
+      "keep_temp_wavs": "Keep intermediate WAV files (useful for debugging).",
+      "mp3gain_normalize": "Analyze and normalize loudness using MP3Gain (writes APEv2 tags).",
+      "randomize_order": "Randomize order before joining into a single MP3.",
+      "sanitize_filenames": "Removes problematic characters to maximize compatibility.",
+      "use_archive": "Use yt-dlp's download archive to skip already-processed items.",
+      "use_run_subdir": "Creates a timestamped subfolder for this run to keep files organized.",
+      "validate_sr": "Validate produced files with ffprobe (duration/sample rate sanity checks).",
+      "verbose_ydl": "Enable verbose yt-dlp logging to help troubleshoot downloads.",
+      "vlc_segments": "Create a VLC playlist that jumps to each segment/track.",
+      "write_cue": "Write a CUE sheet for the joined album."
+    },
+    "cookies_browser": "Use cookies from a supported browser (Chrome/Edge/Firefox).",
+    "cookies_browser_combo": "Cookies_Browser_Combo",
+    "cookies_file_entry": "A cookies.txt (Netscape format) or Cookie-Editor JSON file.",
+    "copy_log_button": "Copy the visible log text to the clipboard.",
+    "delay_spinbox": "Pauses between downloads in a playlist to avoid being rate-limited.",
+    "embed_chapters": "Embed Chapters",
+    "embed_metadata": "Embed Metadata",
+    "fallback_numbering": "Fallback Numbering",
+    "install_deps_button": "Attempt to install missing dependencies (Windows/macOS/Linux).",
+    "join_name_entry": "Name for the final joined MP3 / album.",
+    "open_log_button": "Open the latest log file in your default editor.",
+    "output_folder_entry": "Select the main folder where files, logs, and subfolders will be saved.",
+    "paste_button": "Paste the clipboard contents into this field.",
+    "playlist_format_combo": "Creates a playlist file for all downloaded tracks.",
+    "random_join": "Random Join",
+    "run_button": "Start the processing pipeline.",
+    "sample_rate_combo": "Enforces a consistent audio sample rate. 44100 Hz is standard for CD quality.",
+    "sanitize_filenames_checkbox": "Sanitize Filenames Checkbox",
+    "url_entry": "Paste the full URL of a YouTube video or playlist here. Right-click for context menu.",
+    "use_run_subdir": "Creates a timestamped subfolder for this run to keep files organized.",
+    "verify_tools_button": "Verify external tools are installed and on PATH.",
+    "vlc_segments": "Vlc Segments",
+    "write_cue": "Write CUE"
   }
 }

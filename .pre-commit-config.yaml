@@ -20,3 +20,11 @@ repos:
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: check-i18n-keys
+        name: Check i18n keys match across locales
+        entry: python scripts/check_i18n_keys.py
+        language: system
+        files: ^lang/.*\.json$
+        pass_filenames: false
