@@ -440,7 +440,7 @@ class App(tk.Tk):
         except Exception:
             pass
 
-        w, h = 840, 1020
+        w, h = 840, 950
         x = (self.winfo_screenwidth() - w) // 2
         y = (self.winfo_screenheight() - h) // 2
         self.geometry(f"{w}x{h}+{x}+{y}")
@@ -907,7 +907,7 @@ class App(tk.Tk):
 
         logf = ttk.LabelFrame(self, text=self._t("frames.log", "Log"))
         logf.pack(fill="both", expand=True, **pad)
-        self.log_txt = ScrolledText(logf, height=16, wrap="word")
+        self.log_txt = ScrolledText(logf, height=10, wrap="word")
         self.log_txt.pack(fill="both", expand=True)
         self.log_txt.configure(state="disabled")
         self._attach_context_menu(self.log_txt, "text")
