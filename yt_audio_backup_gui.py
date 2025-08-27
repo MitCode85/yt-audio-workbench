@@ -250,9 +250,8 @@ class App(tk.Tk):
             w = self.winfo_width() or self.winfo_reqwidth() or 800
             h = self.winfo_height() or self.winfo_reqheight() or 600
             sw = self.winfo_screenwidth()
-            sh = self.winfo_screenheight()
             x = int((sw - w) / 2)
-            y = int((sh - h) / 2)
+            y = 0
             self.geometry(f"{w}x{h}+{x}+{y}")
         except Exception:
             pass
@@ -440,7 +439,7 @@ class App(tk.Tk):
         except Exception:
             pass
 
-        w, h = 840, 950
+        w, h = 820, 780
         x = (self.winfo_screenwidth() - w) // 2
         y = (self.winfo_screenheight() - h) // 2
         self.geometry(f"{w}x{h}+{x}+{y}")
@@ -535,8 +534,8 @@ class App(tk.Tk):
         # Enforce minimum window size (height)
         try:
             self.update_idletasks()
-            w = 840
-            h = 1020
+            w = 820
+            h = 780
             self.minsize(w, h)
         except Exception:
             pass
@@ -789,8 +788,8 @@ class App(tk.Tk):
             w = ttk.Checkbutton(chk_grid, text=label, variable=var)
             attach_tooltip(w, lambda k=tip_key: self._t(k, "Tooltip not found."))
             check_widgets.append(w)
-        _relayout_checks(chk_grid, check_widgets, min_col_width=240, max_cols=3)
-        _bind_responsive(chk_grid, check_widgets, min_col_width=240, max_cols=3)
+        _relayout_checks(chk_grid, check_widgets, min_col_width=200, max_cols=4)
+        _bind_responsive(chk_grid, check_widgets, min_col_width=200, max_cols=4)
 
         joinf = ttk.LabelFrame(self, text=self._t("frames.joining", "Joining"))
         joinf.pack(fill="x", **pad)
@@ -853,8 +852,8 @@ class App(tk.Tk):
             wj = ttk.Checkbutton(chk_frame2, text=label, variable=var)
             attach_tooltip(wj, lambda k=tip_key: self._t(k, "Tooltip not found."))
             join_widgets.append(wj)
-        _relayout_checks(chk_frame2, join_widgets, min_col_width=280, max_cols=2)
-        _bind_responsive(chk_frame2, join_widgets, min_col_width=280, max_cols=2)
+        _relayout_checks(chk_frame2, join_widgets, min_col_width=200, max_cols=4)
+        _bind_responsive(chk_frame2, join_widgets, min_col_width=200, max_cols=4)
         deps = ttk.LabelFrame(self, text=self._t("frames.system_deps", "System Dependencies"))
         deps.pack(fill="x", **pad)
         ttk.Label(deps, text="Ensure ffmpeg/ffprobe and optional mp3gain are installed.").pack(
@@ -907,7 +906,7 @@ class App(tk.Tk):
 
         logf = ttk.LabelFrame(self, text=self._t("frames.log", "Log"))
         logf.pack(fill="both", expand=True, **pad)
-        self.log_txt = ScrolledText(logf, height=10, wrap="word")
+        self.log_txt = ScrolledText(logf, height=6, wrap="word")
         self.log_txt.pack(fill="both", expand=True)
         self.log_txt.configure(state="disabled")
         self._attach_context_menu(self.log_txt, "text")
