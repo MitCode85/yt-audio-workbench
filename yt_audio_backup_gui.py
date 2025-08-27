@@ -247,12 +247,10 @@ class App(tk.Tk):
                 return
             self._did_initial_center = True
             self.update_idletasks()
-            w = self.winfo_width() or self.winfo_reqwidth() or 800
-            h = self.winfo_height() or self.winfo_reqheight() or 600
-            sw = self.winfo_screenwidth()
-            x = int((sw - w) / 2)
-            y = 0
-            self.geometry(f"{w}x{h}+{x}+{y}")
+            w = self.winfo_width() or self.winfo_reqwidth() or 820
+            h = self.winfo_height() or self.winfo_reqheight() or 780
+            self.geometry(f"{w}x{h}")
+            self.state('zoomed')
         except Exception:
             pass
 
@@ -508,28 +506,12 @@ class App(tk.Tk):
         except Exception:
             pass
 
-        self._build_ui()
-
-        # Layout → compute size → center → show
-
         try:
-            self.update_idletasks()
-
-            self._center_main_on_screen()
-
-            self.deiconify()
-
-        except Exception:
-            try:
-                self.deiconify()
-
-            except Exception:
-                pass
-
-        try:
-            self.after_idle(self.refresh_i18n_ui)
+            self._load_config()
         except Exception:
             pass
+
+        self._build_ui()
 
         # Enforce minimum window size (height)
         try:
@@ -544,10 +526,6 @@ class App(tk.Tk):
         self.after(100, self._poll_log)
         self.after(100, self._poll_progress)
 
-        try:
-            self._load_config()
-        except Exception:
-            pass
         # Apply saved locale after config load (reuse existing change_language path)
         try:
             saved_locale = None
@@ -568,6 +546,23 @@ class App(tk.Tk):
             self.after(0, self._center_main_on_screen)
         except Exception:
             pass
+
+        # Layout → compute size → center → show
+
+        try:
+            self.update_idletasks()
+
+            self._center_main_on_screen()
+
+            self.deiconify()
+
+        except Exception:
+            try:
+                self.deiconify()
+
+            except Exception:
+                pass
+
 
     def _build_ui(self) -> None:
         pad = dict(padx=8, pady=6)
