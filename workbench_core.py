@@ -188,13 +188,13 @@ def _last_lines(s: str, n: int = 12) -> str:
 
 
 def _run_capture(
-    cmd: list[str], *, timeout: float | None = None, check: bool = True, cwd: str | None = None
+    cmd: list[str], *, timeout: float | None = None, check: bool = True, cwd: str
 ) -> tuple[int, str, str]:
     """
     Run a command to completion, capturing stdout/stderr with optional timeout.
     Raises CalledProcessError when check=True and rc != 0 (with stderr tail).
     """
-    p = _spawn_process(cmd, cwd=cwd)
+    p = _spawn_process(cmd, cwd=cwd, env=env)
     try:
         out, err = p.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
