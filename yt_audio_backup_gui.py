@@ -247,7 +247,7 @@ class App(tk.Tk):
                 return
             self._did_initial_center = True
             self.update_idletasks()
-            w = self.winfo_width() or self.winfo_reqwidth() or 820
+            w = self.winfo_width() or self.winfo_reqwidth() or 1000
             h = self.winfo_height() or self.winfo_reqheight() or 780
             self.geometry(f"{w}x{h}")
             self.state('zoomed')
@@ -437,7 +437,7 @@ class App(tk.Tk):
         except Exception:
             pass
 
-        w, h = 820, 780
+        w, h = 1000, 780
         x = (self.winfo_screenwidth() - w) // 2
         y = (self.winfo_screenheight() - h) // 2
         self.geometry(f"{w}x{h}+{x}+{y}")
